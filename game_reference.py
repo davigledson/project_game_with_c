@@ -1,6 +1,9 @@
-'''Faça um programa que permita ao usuario palpitar quem é o impostor,
+'''um programa que permita ao usuario palpitar quem é o impostor,
  sendo que se o palpite estiver errado o participante selecionado será eliminado
  e em cada rodada o impostor eliminará um participante tambem'''
+
+
+
 lista=['Davi Gledson','Aleandro Martins','Segundo','Professora Ceres','Professor Max','Eleanio','Professor Antonio','Carol','Shefany barbosa']
 
 from random import randint
