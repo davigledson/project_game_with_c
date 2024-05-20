@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b63d9c9c-04f2-4edf-906f-f85a94d350d6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/game.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game.c" beforeDir="false" afterPath="$PROJECT_DIR$/game.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game_reference.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_reference.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

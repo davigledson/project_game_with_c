@@ -4,7 +4,9 @@
 
 
 
-lista=['Davi Gledson','Aleandro Martins','Segundo','Professora Ceres','Professor Max','Eleanio','Professor Antonio','Carol','Shefany barbosa']
+lista=['Davi Gledson','Aleandro Martins','Segundo',
+       'Professora Ceres','Professor Max','Eleanio',
+       'Professor Antonio','Carol','Shefany barbosa']
 
 from random import randint
 from time import sleep
