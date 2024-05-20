@@ -26,7 +26,7 @@ setlocale(LC_ALL, "Portuguese_Brazil");
                                   "Professora Ceres", "Professor Max", "Eleanio",
                                   "Professor Antonio", "Carol", "Shefany barbosa"};
 
-       int num_players = 9;
+    int num_players = 9;
     int impostor_index;
     char impostor[50];
     int player_index;
@@ -34,19 +34,28 @@ setlocale(LC_ALL, "Portuguese_Brazil");
     int user_input;
     int j=0;
     
+    char *boneco_among_us =
+        "⠀⠀⠀⠀⠀⢀⣴⣶⠿⠟⠻⠿⢷⣦⣄⠀⠀⠀\n"
+        "⠀⠀⠀⠀⣾⠏⠀⠀⣠⣤⣤⣤⣬⣿⣷⣄⡀\n"
+        "⠀⢀⣀⣸⡿⠀⠀⣼⡟⠁⠀⠀⠀⠀⠀⠙⣷\n"
+        "⢸⡟⠉⣽⡇⠀⠀⣿⡇⠀⠀⠀⠀⠀⠀⢀⣿\n"
+        "⣾⠇⠀⣿⡇⠀⠀⠘⠿⢶⣶⣤⣤⣶⡶⣿⠋\n"
+        "⣿⠂⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠃\n"
+        "⣿⡆⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀\n"
+        "⢿⡇⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠀\n"
+        "⠘⠻⠷⢿⡇⠀⠀⠀⣴⣶⣶⠶⠖⠀⢸⡟⠀\n"
+        "⠀⠀⠀⢸⣇⠀⠀⠀⣿⡇⣿⡄⠀⢀⣿⠇⠀\n"
+        "⠀⠀⠀⠘⣿⣤⣤⣴⡿⠃⠙⠛⠛⠛⠋⠀⠀\n";
 
-    srand(time(NULL));
-
-    // Choose the impostor
-    impostor_index = rand() % num_players;
-    strcpy(impostor, lista[impostor_index]);
+    
+    strcpy(impostor, lista[numero_aleatorio(num_players)]);
 
     printf("===========================\n");
     printf("Ha um impostor entre nos\n");
     printf("===========================\n");
 
   while (1) {
-        // Encontra a posi??o do impostor
+        // Encontra a posição do impostor
         for (j = 0; j < num_players; j++) {
             if (strcmp(lista[j], impostor) == 0) {
                 player_index = j;
@@ -57,7 +66,7 @@ setlocale(LC_ALL, "Portuguese_Brazil");
         // Escolhe uma v?tima aleat?ria
         int victim_index;
         do {
-            victim_index = rand() % num_players;
+            victim_index = numero_aleatorio(num_players);
         } while (victim_index == player_index);
         strcpy(dead_player, lista[victim_index]);
 
@@ -83,12 +92,13 @@ setlocale(LC_ALL, "Portuguese_Brazil");
 
         // Obt?m o palpite do usu?rio
         printf("Quem ? o impostor? [digite de 0 até %d]: ", num_players - 1);
+        //printf("%s",boneco_among_us);
         while (scanf("%d", &user_input) != 1 || user_input < 0 || user_input >= num_players) {
             while (getchar() != '\n'); // Limpa o buffer de entrada
             printf("Entrada inv?lida. Tente novamente. Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
         }
 
-        // Verifica se o palpite do usu?rio est? correto
+        // Verifica se o palpite do usuario esta correto
         if (strcmp(lista[user_input], impostor) == 0) {
             printf("====================\n");
             printf("%s era o Impostor\n", impostor);
@@ -117,3 +127,11 @@ setlocale(LC_ALL, "Portuguese_Brazil");
 }
 
 }
+
+//escolhe um numero aleatorio até o  parametro limite
+int numero_aleatorio(int limite){
+ srand(time(NULL));
+  
+    return rand() % limite;
+}
+
