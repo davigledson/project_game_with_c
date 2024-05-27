@@ -100,14 +100,34 @@ setlocale(LC_ALL, "Portuguese_Brazil");
 
         // Verifica se o palpite do usuario esta correto
         if (strcmp(lista[user_input], impostor) == 0) {
+
             printf("====================\n");
-            printf("%s era o Impostor\n", impostor);
+           char frase_lenta[] = " ";
+            strcat(frase_lenta,lista[user_input]);
+            strcat(frase_lenta," era o impostor!");
+            //printf("%s era o Impostor\n", impostor);
+             for (int i = 0; frase_lenta[i] != '\0'; i++) {
+            printf("%c", frase_lenta[i]);
+            fflush(stdout);
+            usleep(100000); // Atraso de 100 milissegundos
+        }
+             printf("\n");
             printf("====================\n");
             printf("Parabéns! VOCÊ GANHOU!\n");
             break;
         } else {
             printf("====================\n");
-            printf("%s não era o impostor!\n", lista[user_input]);
+            char frase_lenta[] = " ";
+            strcat(frase_lenta,lista[user_input]);
+            strcat(frase_lenta," não era o impostor!");
+
+              for (int i = 0; frase_lenta[i] != '\0'; i++) {
+            printf("%c", frase_lenta[i]);
+            fflush(stdout);
+            usleep(100000); // Atraso de 100 milissegundos
+        }
+            //printf("%s não era o impostor!\n", lista[user_input]);
+            printf("\n");
             printf("====================\n");
             // Remove o palpite incorreto da lista
             for (j = user_input; j < num_players - 1; j++) {
