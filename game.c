@@ -6,7 +6,7 @@
 #define MAX_PLAYERS 100
 int main(){
 	
-setlocale(LC_ALL, "Portuguese_Brazil");
+setlocale(LC_ALL,"Portuguese_Brazil");
     // Conhecimentos necess�rios
 
     // LISTAS (ADICAO,REMO��O,CONTAGEM DE COMPONENTES)
