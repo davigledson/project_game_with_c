@@ -7,20 +7,35 @@
 int main(){
 	
 setlocale(LC_ALL,"Portuguese_Brazil");
-    // Conhecimentos necess�rios
+    // Conhecimentos necessarios
 
-    // LISTAS (ADICAO,REMO��O,CONTAGEM DE COMPONENTES)
-    // ESTRUTURAS DE REPETI��O
-    // FUN��O RAND�MICA
-    // FUN��O DE TIME.SLEEP (FAZER O PRINTF APARECER DEVAGAR)
+    // LISTAS (ADICAO,REMO��O,CONTAGEM DE COMPONENTES)
+    // ESTRUTURAS DE REPETI��O
+    // FUN��O RAND?MICA
+    // FUN��O DE TIME.SLEEP (FAZER O PRINTF APARECER DEVAGAR)
 
-    //Obrigat�rio ter 
+    //Obrigat�rio ter 
 
     //MENU
     //PAUSE
-    //PONTUACAO
+    //PONTUA��O
 
+     /*
+            strcpy: Copia uma string para outra. (Biblioteca: <string.h>)
+
+            strcmp: Compara duas strings. (Biblioteca: <string.h>)
+
+            strcat: Concatena duas strings. (Biblioteca: <string.h>)
+
+            srand: Inicializa o gerador de n�meros aleat�rios. (Biblioteca: <stdlib.h>)
+
+            rand: Retorna um n�mero inteiro aleat�rio. (Biblioteca: <stdlib.h>)
+
+            time: Retorna o tempo atual. (Biblioteca: <time.h>)
+
+            usleep: Suspende a execu��o por um n�mero especificado de microssegundos. (Biblioteca: <unistd.h>; 
      
+     */
 
       char lista[MAX_PLAYERS][50] = {"Davi Gledson", "Aleandro Martins", "Segundo",
                                   "Professora Ceres", "Professor Max", "Eleanio",
@@ -35,17 +50,17 @@ setlocale(LC_ALL,"Portuguese_Brazil");
     int j=0;
     
     char *boneco_among_us =
-        "⠀⠀⠀⠀⠀⢀⣴⣶⠿⠟⠻⠿⢷⣦⣄⠀⠀⠀\n"
-        "⠀⠀⠀⠀⣾⠏⠀⠀⣠⣤⣤⣤⣬⣿⣷⣄⡀\n"
-        "⠀⢀⣀⣸⡿⠀⠀⣼⡟⠁⠀⠀⠀⠀⠀⠙⣷\n"
-        "⢸⡟⠉⣽⡇⠀⠀⣿⡇⠀⠀⠀⠀⠀⠀⢀⣿\n"
-        "⣾⠇⠀⣿⡇⠀⠀⠘⠿⢶⣶⣤⣤⣶⡶⣿⠋\n"
-        "⣿⠂⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠃\n"
-        "⣿⡆⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀\n"
-        "⢿⡇⠀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠀\n"
-        "⠘⠻⠷⢿⡇⠀⠀⠀⣴⣶⣶⠶⠖⠀⢸⡟⠀\n"
-        "⠀⠀⠀⢸⣇⠀⠀⠀⣿⡇⣿⡄⠀⢀⣿⠇⠀\n"
-        "⠀⠀⠀⠘⣿⣤⣤⣴⡿⠃⠙⠛⠛⠛⠋⠀⠀\n";
+        "??????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n"
+        "?????????????????\n";
 
     
     strcpy(impostor, lista[numero_aleatorio(num_players)]);
@@ -55,7 +70,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
     printf("===========================\n");
 
   while (1) {
-        // Encontra a posição do impostor
+        // Encontra a posi��o do impostor
         for (j = 0; j < num_players; j++) {
             if (strcmp(lista[j], impostor) == 0) {
                 player_index = j;
@@ -63,25 +78,28 @@ setlocale(LC_ALL,"Portuguese_Brazil");
             }
         }
 
-        // Escolhe uma v?tima aleat?ria
+        // Escolhe uma vitima aleatoria
         int victim_index;
         do {
             victim_index = numero_aleatorio(num_players);
         } while (victim_index == player_index);
         strcpy(dead_player, lista[victim_index]);
 
+       
         printf("O impostor matou %s\n", dead_player);
         printf("====================\n");
+         
 
-        // Remove a v?tima da lista
+        // Remove a vitima da lista
         for (j = victim_index; j < num_players - 1; j++) {
             strcpy(lista[j], lista[j + 1]);
         }
         num_players--;
-
-        printf("Os Sobreviventes são:");
+    
+        printf("Os Sobreviventes s�o:");
         for (j = 0; j < num_players; j++) {
             printf(" %s", lista[j]);
+            printf(" |");
         }
         printf("\n");
 
@@ -90,12 +108,12 @@ setlocale(LC_ALL,"Portuguese_Brazil");
             printf("[%d] - %s\n", j, lista[j]);
         }
 
-        // Obt?m o palpite do usu?rio
-        printf("Quem ? o impostor? [digite de 0 até %d]: ", num_players - 1);
+        // Obtom o palpite do usu?rio
+        printf("Quem � o impostor? [digite de 0 at� %d]: ", num_players - 1);
         //printf("%s",boneco_among_us);
         while (scanf("%d", &user_input) != 1 || user_input < 0 || user_input >= num_players) {
             while (getchar() != '\n'); // Limpa o buffer de entrada
-            printf("Entrada inv?lida. Tente novamente. Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
+            printf("Entrada invalida. Tente novamente. Quem � o impostor? [digite de 0 at� %d]: ", num_players - 1);
         }
 
         // Verifica se o palpite do usuario esta correto
@@ -113,20 +131,20 @@ setlocale(LC_ALL,"Portuguese_Brazil");
         }
              printf("\n");
             printf("====================\n");
-            printf("Parabéns! VOCÊ GANHOU!\n");
+            printf("Parab�ns! VOC� GANHOU!\n");
             break;
         } else {
             printf("====================\n");
             char frase_lenta[] = " ";
             strcat(frase_lenta,lista[user_input]);
-            strcat(frase_lenta," não era o impostor!");
+            strcat(frase_lenta," n�o era o impostor!");
 
               for (int i = 0; frase_lenta[i] != '\0'; i++) {
             printf("%c", frase_lenta[i]);
             fflush(stdout);
             usleep(100000); // Atraso de 100 milissegundos
         }
-            //printf("%s não era o impostor!\n", lista[user_input]);
+            //printf("%s n�o era o impostor!\n", lista[user_input]);
             printf("\n");
             printf("====================\n");
             // Remove o palpite incorreto da lista
@@ -141,14 +159,14 @@ setlocale(LC_ALL,"Portuguese_Brazil");
             printf("====================\n");
             printf("%s era o Impostor\n", impostor);
             printf("====================\n");
-            printf("VOCÊ PERDEU!\n");
+            printf("VOC� PERDEU!\n");
             break;
         }
 }
 
 }
 
-//escolhe um numero aleatorio até o  parametro limite
+//escolhe um numero aleatorio at� o  parametro limite
 int numero_aleatorio(int limite){
  srand(time(NULL));
   
