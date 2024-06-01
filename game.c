@@ -3,7 +3,11 @@
 #include <string.h>
 #include <time.h>
 #include <locale.h>
-#define MAX_PLAYERS 100
+
+#include "funcoes.h"
+#include "funcoes.c"
+
+//#define MAX_PLAYERS 100
 int main(){
 	
 setlocale(LC_ALL,"Portuguese_Brazil");
@@ -33,15 +37,23 @@ setlocale(LC_ALL,"Portuguese_Brazil");
 
             time: Retorna o tempo atual. (Biblioteca: <time.h>)
 
-            usleep: Suspende a execução por um número especificado de microssegundos. (Biblioteca: <unistd.h>; 
+            usleep: Suspende a execução por um número especificado de microssegundos. Biblioteca: <unistd.h>; 
      
      */
 
-      char lista[MAX_PLAYERS][50] = {"Davi Gledson", "Aleandro Martins", "Segundo",
-                                  "Professora Ceres", "Professor Max", "Eleanio",
-                                  "Professor Antonio", "Carol", "Shefany barbosa"};
+    //   char lista[MAX_PLAYERS][50] = {"Davi Gledson", "Aleandro Martins", "Segundo",
+    //                               "Professora Ceres", "Professor Max", "Eleanio",
+    //                               "Professor Antonio", "Carol", "Shefany barbosa"};
+    char lista[50][20] = {};
+   char **lista_de_ponteiros = primeiro_periodo();
+   for(int i = 0; i <48; i++){
 
-    int num_players = 9;
+    //copia o conteudo da lista de ponteiros para lista de declaração normal
+    strcpy(lista[i], lista_de_ponteiros[i]);
+  }
+    //TEM QUE CRIAR UMA FUNCAO PARA CONTAR O O CONTEUDO DA LISTA
+    int num_players = 47;
+    
     int impostor_index;
     char impostor[50];
     int player_index;
@@ -82,12 +94,14 @@ setlocale(LC_ALL,"Portuguese_Brazil");
         int victim_index;
         do {
             victim_index = numero_aleatorio(num_players);
+             //printf("------------%d --------\n",victim_index);
         } while (victim_index == player_index);
         strcpy(dead_player, lista[victim_index]);
 
        
-        printf("O impostor matou %s\n", dead_player);
+        printf("O impostor matou %s ------ %s\n",impostor ,dead_player);
         printf("====================\n");
+        
          
 
         // Remove a vitima da lista
