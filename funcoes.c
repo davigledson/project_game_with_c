@@ -57,6 +57,19 @@ char** primeiro_periodo(){
     return lista_nomes;
 }
 
+char** professores(){
+    
+    static char* lista_nomes[MAX_PLAYERS] = {
+        "Ceres Germanna",
+        "Allyson Menden",
+        "Max Lopes",
+        "Antonio Oliveira",
+        "Henrique"
+        
+    };
+
+    return lista_nomes;
+}
 int soma(int a){
     return a;
 }
