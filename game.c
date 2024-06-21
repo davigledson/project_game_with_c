@@ -11,30 +11,30 @@ int numero_aleatorio(int limite){
  srand(time(NULL));
   
     return rand() % limite;
-}
+}//aaaa
 
 //#define MAX_PLAYERS 100
 int main(){
 	
 setlocale(LC_ALL,"Portuguese_Brazil");
 
-//escolhe um numero aleatorio até o  parametro limite
+//escolhe um numero aleatorio atï¿½ o  parametro limite
 
 
 
         //Ideia: colocar dica quando estiver se aproximando no final
     // Conhecimentos necessarios
 
-    // LISTAS (ADICAO,REMOÇÃO,CONTAGEM DE COMPONENTES)
-    // ESTRUTURAS DE REPETIÇÃO
-    // FUNÇÃO RAND?MICA
-    // FUNÇÃO DE TIME.SLEEP (FAZER O PRINTF APARECER DEVAGAR)
+    // LISTAS (ADICAO,REMOï¿½ï¿½O,CONTAGEM DE COMPONENTES)
+    // ESTRUTURAS DE REPETIï¿½ï¿½O
+    // FUNï¿½ï¿½O RAND?MICA
+    // FUNï¿½ï¿½O DE TIME.SLEEP (FAZER O PRINTF APARECER DEVAGAR)
 
-    //Obrigatório ter 
+    //Obrigatï¿½rio ter 
 
     //MENU
     //PAUSE
-    //PONTUAÇÃO
+    //PONTUAï¿½ï¿½O
 
      /*
             strcpy: Copia uma string para outra. (Biblioteca: <string.h>)
@@ -43,13 +43,13 @@ setlocale(LC_ALL,"Portuguese_Brazil");
 
             strcat: Concatena duas strings. (Biblioteca: <string.h>)
 
-            srand: Inicializa o gerador de números aleatórios. (Biblioteca: <stdlib.h>)
+            srand: Inicializa o gerador de nï¿½meros aleatï¿½rios. (Biblioteca: <stdlib.h>)
 
-            rand: Retorna um número inteiro aleatório. (Biblioteca: <stdlib.h>)
+            rand: Retorna um nï¿½mero inteiro aleatï¿½rio. (Biblioteca: <stdlib.h>)
 
             time: Retorna o tempo atual. (Biblioteca: <time.h>)
 
-            usleep: Suspende a execução por um número especificado de microssegundos. Biblioteca: <unistd.h>; 
+            usleep: Suspende a execuï¿½ï¿½o por um nï¿½mero especificado de microssegundos. Biblioteca: <unistd.h>; 
      
      */
 
@@ -60,7 +60,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
    char **lista_de_ponteiros = primeiro_periodo();
 //    for(int i = 0; i <48; i++){
 
-//     //copia o conteudo da lista de ponteiros para lista de declaração normal
+//     //copia o conteudo da lista de ponteiros para lista de declaraï¿½ï¿½o normal
 //     strcpy(lista[i], lista_de_ponteiros[i]);
 //   }
     //TEM QUE CRIAR UMA FUNCAO PARA CONTAR O O CONTEUDO DA LISTA
@@ -84,7 +84,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
     printf("===========================\n");
 
   while (1) {
-        // Encontra a posição do impostor
+        // Encontra a posiï¿½ï¿½o do impostor
         for (j = 0; j < num_players; j++) {
             if (strcmp(lista[j], impostor) == 0) {
                 impostor_index = j;
@@ -92,12 +92,12 @@ setlocale(LC_ALL,"Portuguese_Brazil");
             }
         }
 
-        // Escolhe uma vitima aleatória
+        // Escolhe uma vitima aleatï¿½ria
         int victim_index;
         do {
             victim_index = numero_aleatorio(num_players);
              //printf("------------%d --------\n",victim_index);
-        } while (victim_index == impostor_index); // Garante que a vítima não seja o impostor
+        } while (victim_index == impostor_index); // Garante que a vï¿½tima nï¿½o seja o impostor
         strcpy(dead_player, lista[victim_index]);
 
        
@@ -112,7 +112,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
         }
         num_players--;
         //printf("NUMEROS DE JOGADORES %d:\n",num_players);
-        printf("Os Sobreviventes são:\n");
+        printf("Os Sobreviventes sï¿½o:\n");
         for (j = 0; j < num_players; j++) {
             printf(" %s", lista[j]);
             printf(" |");
@@ -125,11 +125,11 @@ setlocale(LC_ALL,"Portuguese_Brazil");
         }
 
         // Obtem o palpite do usuario
-        printf("Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
+        printf("Quem ï¿½ o impostor? [digite de 0 atï¿½ %d]: ", num_players - 1);
         //printf("%s",boneco_among_us);
-        while (scanf("%d", &user_input) != 1 || user_input < 0 || user_input >= num_players) { // Verificação de entrada válida
+        while (scanf("%d", &user_input) != 1 || user_input < 0 || user_input >= num_players) { // Verificaï¿½ï¿½o de entrada vï¿½lida
             while (getchar() != '\n'); // Limpa o buffer de entrada
-            printf("Entrada inválida. Tente novamente. Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
+            printf("Entrada invï¿½lida. Tente novamente. Quem ï¿½ o impostor? [digite de 0 atï¿½ %d]: ", num_players - 1);
         }
         // Verifica se o palpite do usuario esta correto
         if (strcmp(lista[user_input], impostor) == 0) {
@@ -146,11 +146,11 @@ setlocale(LC_ALL,"Portuguese_Brazil");
         }
              printf("\n");
             printf("====================\n");
-            printf("Parabéns! VOCÊ GANHOU!\n");
+            printf("Parabï¿½ns! VOCï¿½ GANHOU!\n");
             break;
         } else {
             printf("====================\n");
-            printf("%s não era o impostor!\n", lista[user_input]);
+            printf("%s nï¿½o era o impostor!\n", lista[user_input]);
             printf("====================\n");
             // Remove o palpite incorreto da lista
             for (j = user_input; j < num_players - 1; j++) {
@@ -164,7 +164,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
             printf("====================\n");
             printf("%s era o Impostor\n", impostor);
             printf("====================\n");
-            printf("VOCÊ PERDEU!\n");
+            printf("VOCï¿½ PERDEU!\n");
             break;
         }
 }
