@@ -12,7 +12,7 @@ int numero_aleatorio(int limite){
  srand(time(NULL));
   
     return rand() % limite;
-}
+}//aaaa
 
 //#define MAX_PLAYERS 100
 int main(){
@@ -75,6 +75,7 @@ setlocale(LC_ALL,"Portuguese_Brazil");
     char dead_player[50];
     int user_input;
     int j=0, i=0 ;
+   
     
 
     
@@ -85,7 +86,10 @@ setlocale(LC_ALL,"Portuguese_Brazil");
     printf("===========================\n");
 
   while (1) {
+
         // Encontra a posicao do impostor
+
+ 
         for (j = 0; j < num_players; j++) {
             if (strcmp(lista[j], impostor) == 0) {
                 impostor_index = j;
