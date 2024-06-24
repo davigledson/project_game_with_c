@@ -1,27 +1,8 @@
-/*******************************************************************************************
- *
- *   raylib [core] example - Basic 3d example
- *
- *   Welcome to raylib!
- *
- *   To compile example, just press F5.
- *   Note that compiled executable is placed in the same folder as .c file
- *
- *   You can find all basic examples on C:\raylib\raylib\examples folder or
- *   raylib official webpage: www.raylib.com
- *
- *   Enjoy using raylib. :)
- *
- *   This example has been created using raylib 1.0 (www.raylib.com)
- *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
- *
- *   Copyright (c) 2013-2022 Ramon Santamaria (@raysan5)
- *
- ********************************************************************************************/
 
 #include "raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h> // Incluir a biblioteca para o tipo bool
 #define MAX_INPUT_CHARS 15
 #define screenWidth 1200
 #define screenHeight 650
@@ -29,17 +10,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-//----------------------------------------------------------------------------------
-// Local Variables Definition (local to this module)
 
-//----------------------------------------------------------------------------------
-// Local Functions Declaration
-//----------------------------------------------------------------------------------
-// Update and draw one frame
-
-//----------------------------------------------------------------------------------
-// Main entry point
-//----------------------------------------------------------------------------------
 typedef enum
 {
     STATE_TELA_MENU,
@@ -55,14 +26,22 @@ typedef struct {
     bool clicked;
 } Button;
 
+typedef struct {
+    float scrollingBack;
+    float scrollingMid;
+    float scrollingFore;
+} ScrollingPositions;
 
+_Bool IsButtonClicked(Button button);
+// Função de atualização que retorna uma estrutura com as novas posições de rolagem
+ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth);
 int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
      
-    GameState currentState = STATE_TELA_INPUT;
-    
+    GameState currentState = STATE_TELA_MENU;
+    ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
     
     // STATE = 0; TELA DO MENU
     // STATE = 1; TELA DO INPUT
@@ -82,13 +61,21 @@ int main()
 
     SetTargetFPS(60); // Set our game to run at 10 frames-per-second
     //--------------------------------------------------------------------------------------
-
+    Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
+    Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
+    Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
+    //IMPLEMENTA A LOGICA DAS INTERFACES
+    
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         switch (currentState)
         {
         case STATE_TELA_MENU:
+       
+            positions = UpdateScrolling(positions, background.width, midground.width, foreground.width);
+        
+
                 
             break;
         case STATE_TELA_INPUT:
@@ -164,7 +151,7 @@ int main()
         {
         case STATE_TELA_MENU:
         // DrawTexture(background, 0, 0, WHITE);
-            menuGUI();
+             menuGUI(background, midground, foreground, positions,&currentState);
 
             break;
         case STATE_TELA_INPUT:
@@ -182,6 +169,9 @@ int main()
     // De-Initialization
     //--------------------------------------------------------------------------------------
 
+     UnloadTexture(background);
+     UnloadTexture(midground);
+     UnloadTexture(foreground);
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -232,12 +222,28 @@ void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOn
     }
 }
 
-void menuGUI()
+void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions,GameState *currentState)
 {
-   Texture2D background = LoadTexture("imgs/background.png");
+  
+     ClearBackground(GetColor(0x052c46ff));
 
-    ClearBackground(RAYWHITE);
-    DrawTexture(background, 0, 0, WHITE);
+               ClearBackground(GetColor(0x052c46ff));
+
+    // Desenhar imagem de fundo duas vezes
+    DrawTextureEx(background, (Vector2){ positions.scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(background, (Vector2){ background.width*2 + positions.scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
+
+    // Desenhar imagem de meio fundo duas vezes
+    DrawTextureEx(midground, (Vector2){ positions.scrollingMid, 20 }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(midground, (Vector2){ midground.width*2 + positions.scrollingMid, 20 }, 0.0f, 2.0f, WHITE);
+
+    // Desenhar imagem de primeiro plano duas vezes
+    DrawTextureEx(foreground, (Vector2){ positions.scrollingFore, 70 }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(foreground, (Vector2){ foreground.width*2 + positions.scrollingFore, 70 }, 0.0f, 2.0f, WHITE);
+
+    DrawText("BACKGROUND SCROLLING & PARALLAX", 10, 10, 20, RED);
+    DrawText("(c) Cyberpunk Street Environment by Luis Zuno (@ansimuz)", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
+    
      
     // Desenhar título
     // Declaração das variáveis globais
@@ -248,13 +254,38 @@ Button btnExit = { (Rectangle){ screenWidth/2 - 100, 400, 200, 50 }, "Sair", fal
         DrawButton(btnPlay);
         DrawButton(btnOptions);
         DrawButton(btnExit);
-        if(btnPlay.clicked == 1 ||  btnExit.clicked == 1){
-            UnloadTexture(background);
-        }
+
+        
+    /// Verificar cliques
+    if (IsButtonClicked(btnPlay)) {
+        // Lógica para quando o botão "Jogar" é clicado
+        *currentState = STATE_TELA_INPUT;
+         
+    }
+   
+    if (IsButtonClicked(btnExit)) {
+        // Lógica para quando o botão "Sair" é clicado
+ 
+        CloseWindow();  // Fechar a janela do Raylib
+    }
+     
         
         
 }
+// Função de atualização da tela do menu
+ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth)
+{
+    positions.scrollingBack -= 0.1f;
+    positions.scrollingMid -= 0.5f;
+    positions.scrollingFore -= 1.0f;
 
+    // Ajustar a posição de rolagem para o efeito contínuo
+    if (positions.scrollingBack <= -backgroundWidth*2) positions.scrollingBack = 0;
+    if (positions.scrollingMid <= -midgroundWidth*2) positions.scrollingMid = 0;
+    if (positions.scrollingFore <= -foregroundWidth*2) positions.scrollingFore = 0;
+
+    return positions;
+}
 
 // Função para desenhar um botão
 void DrawButton(Button button) {
@@ -264,4 +295,9 @@ void DrawButton(Button button) {
     // Desenhar texto centralizado no botão
     DrawText(button.text, button.bounds.x + button.bounds.width/2 - MeasureText(button.text, 20)/2,
              button.bounds.y + button.bounds.height/2 - 10, 20, WHITE);
+}
+
+_Bool IsButtonClicked(Button button)
+{
+    return (CheckCollisionPointRec(GetMousePosition(), button.bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON));
 }
