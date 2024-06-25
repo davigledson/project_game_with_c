@@ -59,12 +59,18 @@ int main()
 
     int framesCounter = 0;
 
-    SetTargetFPS(60); // Set our game to run at 10 frames-per-second
+    SetTargetFPS(60); 
     //--------------------------------------------------------------------------------------
     Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
     Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
     Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
     //IMPLEMENTA A LOGICA DAS INTERFACES
+     
+    
+    // **Alteração:**  para não iniciarlizar a tela de menu com uma parte da tela preta
+    positions.scrollingBack = -background.width; // Centralizar a textura de fundo
+    positions.scrollingMid = -midground.width;
+    positions.scrollingFore = -foreground.width;
     
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -218,31 +224,35 @@ void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOn
                 DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
         }
         else
-            DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+            DrawText("Pressione BACKSPACE para deletar caracteres...", 230, 300, 20, GRAY);
     }
 }
 
 void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions,GameState *currentState)
 {
   
-     ClearBackground(GetColor(0x052c46ff));
+     
 
-               ClearBackground(GetColor(0x052c46ff));
+    
 
-    // Desenhar imagem de fundo duas vezes
-    DrawTextureEx(background, (Vector2){ positions.scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(background, (Vector2){ background.width*2 + positions.scrollingBack, 20 }, 0.0f, 2.0f, WHITE);
+    // Calcular posição para centralizar a textura na tela
+    float backgroundOffsetX = (screenWidth - background.width * 2) / 2;
+    float backgroundOffsetY = (screenHeight - background.height * 2) / 2;
 
-    // Desenhar imagem de meio fundo duas vezes
-    DrawTextureEx(midground, (Vector2){ positions.scrollingMid, 20 }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(midground, (Vector2){ midground.width*2 + positions.scrollingMid, 20 }, 0.0f, 2.0f, WHITE);
+    // Desenhar imagem de fundo duas vezes para rolagem contínua
+    DrawTextureEx(background, (Vector2){ backgroundOffsetX + positions.scrollingBack, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(background, (Vector2){ backgroundOffsetX + background.width * 2 + positions.scrollingBack, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
 
-    // Desenhar imagem de primeiro plano duas vezes
-    DrawTextureEx(foreground, (Vector2){ positions.scrollingFore, 70 }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(foreground, (Vector2){ foreground.width*2 + positions.scrollingFore, 70 }, 0.0f, 2.0f, WHITE);
+    // Desenhar imagem de meio fundo duas vezes para rolagem contínua
+    DrawTextureEx(midground, (Vector2){ backgroundOffsetX + positions.scrollingMid, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(midground, (Vector2){ backgroundOffsetX + midground.width * 2 + positions.scrollingMid, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
 
-    DrawText("BACKGROUND SCROLLING & PARALLAX", 10, 10, 20, RED);
-    DrawText("(c) Cyberpunk Street Environment by Luis Zuno (@ansimuz)", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
+    // Desenhar imagem de primeiro plano duas vezes para rolagem contínua
+    DrawTextureEx(foreground, (Vector2){ backgroundOffsetX + positions.scrollingFore, backgroundOffsetY + 50 }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(foreground, (Vector2){ backgroundOffsetX + foreground.width * 2 + positions.scrollingFore, backgroundOffsetY + 50 }, 0.0f, 2.0f, WHITE);
+
+    DrawText("Detetive", 10, 10, 20, RED);
+    DrawText("(c) Detetive Environment by PassaDisciplina ", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
     
      
     // Desenhar título
