@@ -3,7 +3,6 @@ CFLAGS = -Wall -std=c99
 LDFLAGS = -lraylib
 
 SOURCES = interface.c
-
 EXECUTABLE = game
 
 all: $(EXECUTABLE)
