@@ -10,7 +10,6 @@
 #include <emscripten/emscripten.h>
 #endif
 
-
 typedef enum
 {
     STATE_TELA_MENU,
@@ -19,14 +18,16 @@ typedef enum
     STATE_GAMEOVER
 } GameState;
 // Estrutura para representar um botão
-typedef struct {
+typedef struct
+{
     Rectangle bounds;
     const char *text;
     bool hovered;
     bool clicked;
 } Button;
 
-typedef struct {
+typedef struct
+{
     float scrollingBack;
     float scrollingMid;
     float scrollingFore;
@@ -39,50 +40,50 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-     
+
     GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
-    
+
     // STATE = 0; TELA DO MENU
     // STATE = 1; TELA DO INPUT
     // STATE = 2; TELA DA GAMEPLAY
     // STATE = 4; TELA DA RANKING
-    
 
     InitWindow(screenWidth, screenHeight, "Tela inicial do jogo");
 
     char name[MAX_INPUT_CHARS + 1] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
-    Rectangle textBox = {screenWidth / 2.0f - 100, 180, 225, 50};
+    Rectangle textBox = {screenWidth / 2.0f - 200, 180, 380, 50};
     bool mouseOnText = false;
 
     int framesCounter = 0;
 
-    SetTargetFPS(60); 
+    SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
     Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
     Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
     Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
-    //IMPLEMENTA A LOGICA DAS INTERFACES
-     
-    
+    // IMPLEMENTA A LOGICA DAS INTERFACES
+    InitAudioDevice();
+    Music music = LoadMusicStream("sounds/amoung_theme.mp3");
+    PlayMusicStream(music); // Iniciar a reprodução da música
+
     // **Alteração:**  para não iniciarlizar a tela de menu com uma parte da tela preta
     positions.scrollingBack = -background.width; // Centralizar a textura de fundo
     positions.scrollingMid = -midground.width;
     positions.scrollingFore = -foreground.width;
-    
+
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
+        // Atualizar a música
+        UpdateMusicStream(music);
+        positions = UpdateScrolling(positions, background.width, midground.width, foreground.width);
         switch (currentState)
         {
         case STATE_TELA_MENU:
-       
-            positions = UpdateScrolling(positions, background.width, midground.width, foreground.width);
-        
 
-                
             break;
         case STATE_TELA_INPUT:
             if (CheckCollisionPointRec(GetMousePosition(), textBox))
@@ -135,13 +136,16 @@ int main()
                 // EScreve alno no arquivo
                 DrawText("Cdsfsfsdfsdfsfsfdsafsf!", 240, 140, 20, GRAY);
                 FILE *file = fopen("ranking.txt", "a"); // Usar "w" para sobrescrever ou "a" para anexar
-                fprintf(file, "%s\n", name); 
-                 fclose(file);
-                currentState = STATE_TELA_MENU;
+                fprintf(file, "%s\n", name);
+                fclose(file);
+                DrawText(name, (screenWidth / 2) - 50, 10, 40, RED);
+                currentState = STATE_TELA_GAMEPLAY;
             }
 
             break;
         case STATE_TELA_GAMEPLAY:
+        
+
 
             break;
         }
@@ -152,19 +156,18 @@ int main()
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
-    
         switch (currentState)
         {
         case STATE_TELA_MENU:
-        // DrawTexture(background, 0, 0, WHITE);
-             menuGUI(background, midground, foreground, positions,&currentState);
+            // DrawTexture(background, 0, 0, WHITE);
+            menuGUI(background, midground, foreground, positions, &currentState);
 
             break;
         case STATE_TELA_INPUT:
-            inputGUI(name, letterCount, textBox, mouseOnText, framesCounter);
+            inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
-
+            gameGUI(&currentState);
             break;
         }
 
@@ -175,10 +178,12 @@ int main()
     // De-Initialization
     //--------------------------------------------------------------------------------------
 
-     UnloadTexture(background);
-     UnloadTexture(midground);
-     UnloadTexture(foreground);
-    CloseWindow(); // Close window and OpenGL context
+    UnloadTexture(background);
+    UnloadTexture(midground);
+    UnloadTexture(foreground);
+    UnloadMusicStream(music); // Descarregar a música
+    CloseAudioDevice();       // Fechar a biblioteca de áudio
+    CloseWindow();            // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     return 0;
@@ -196,24 +201,44 @@ bool IsAnyKeyPressed()
     return keyPressed;
 }
 
-void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOnText, int framesCounter)
+void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOnText, int framesCounter, Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions, GameState *currentState)
 {
-    ClearBackground(RAYWHITE);
+    // ClearBackground(RAYWHITE);
     // X - para os lados
     // - Y para cima e baixo
-    DrawText(name, 380, 10, 40, RED);
 
-    DrawText("COLOQUE O MOUSE SOBRE A CAIXA DE ENTRADA!", 340, 140, 20, GRAY);
+    // Calcular posição para centralizar a textura na tela
+    float backgroundOffsetX = (screenWidth - background.width * 2) / 2;
+    float backgroundOffsetY = (screenHeight - background.height * 2) / 2;
 
-    DrawRectangleRec(textBox, LIGHTGRAY);
+    // Desenhar imagem de fundo duas vezes para rolagem contínua
+    DrawTextureEx(background, (Vector2){backgroundOffsetX + positions.scrollingBack, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(background, (Vector2){backgroundOffsetX + background.width * 2 + positions.scrollingBack, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+
+    // Desenhar imagem de meio fundo duas vezes para rolagem contínua
+    DrawTextureEx(midground, (Vector2){backgroundOffsetX + positions.scrollingMid, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(midground, (Vector2){backgroundOffsetX + midground.width * 2 + positions.scrollingMid, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+
+    // Desenhar imagem de primeiro plano duas vezes para rolagem contínua
+    DrawTextureEx(foreground, (Vector2){backgroundOffsetX + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(foreground, (Vector2){backgroundOffsetX + foreground.width * 2 + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
+
+    DrawText(name, (screenWidth / 2) - 50, 10, 40, RED);
+
+    DrawText("Detetive", 10, 10, 20, RED);
+    DrawText("(c) Detetive Environment by PassaDisciplina ", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
+
+    DrawText("COLOQUE O MOUSE SOBRE A CAIXA DE ENTRADA!", 340, 140, 20, RED);
+
+    DrawRectangleRec(textBox, DARKBLUE);
     if (mouseOnText)
         DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
     else
         DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
-    DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+    DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, RED);
 
-    DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_INPUT_CHARS), 340, 250, 20, DARKGRAY);
+    DrawText(TextFormat("MAX Letras: %i/%i", letterCount, MAX_INPUT_CHARS), (screenWidth / 2) - 50, 250, 20, RED);
 
     if (mouseOnText)
     {
@@ -224,64 +249,89 @@ void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOn
                 DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, MAROON);
         }
         else
-            DrawText("Pressione BACKSPACE para deletar caracteres...", 230, 300, 20, GRAY);
+            DrawText("Pressione BACKSPACE para deletar caracteres...", 230, 300, 20, RED);
     }
 }
 
-void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions,GameState *currentState)
+void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions, GameState *currentState)
 {
-  
-     
-
-    
 
     // Calcular posição para centralizar a textura na tela
     float backgroundOffsetX = (screenWidth - background.width * 2) / 2;
     float backgroundOffsetY = (screenHeight - background.height * 2) / 2;
 
     // Desenhar imagem de fundo duas vezes para rolagem contínua
-    DrawTextureEx(background, (Vector2){ backgroundOffsetX + positions.scrollingBack, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(background, (Vector2){ backgroundOffsetX + background.width * 2 + positions.scrollingBack, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(background, (Vector2){backgroundOffsetX + positions.scrollingBack, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(background, (Vector2){backgroundOffsetX + background.width * 2 + positions.scrollingBack, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
 
     // Desenhar imagem de meio fundo duas vezes para rolagem contínua
-    DrawTextureEx(midground, (Vector2){ backgroundOffsetX + positions.scrollingMid, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(midground, (Vector2){ backgroundOffsetX + midground.width * 2 + positions.scrollingMid, backgroundOffsetY }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(midground, (Vector2){backgroundOffsetX + positions.scrollingMid, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(midground, (Vector2){backgroundOffsetX + midground.width * 2 + positions.scrollingMid, backgroundOffsetY}, 0.0f, 2.0f, WHITE);
 
     // Desenhar imagem de primeiro plano duas vezes para rolagem contínua
-    DrawTextureEx(foreground, (Vector2){ backgroundOffsetX + positions.scrollingFore, backgroundOffsetY + 50 }, 0.0f, 2.0f, WHITE);
-    DrawTextureEx(foreground, (Vector2){ backgroundOffsetX + foreground.width * 2 + positions.scrollingFore, backgroundOffsetY + 50 }, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(foreground, (Vector2){backgroundOffsetX + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
+    DrawTextureEx(foreground, (Vector2){backgroundOffsetX + foreground.width * 2 + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
 
     DrawText("Detetive", 10, 10, 20, RED);
     DrawText("(c) Detetive Environment by PassaDisciplina ", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
-    
-     
+
     // Desenhar título
     // Declaração das variáveis globais
-Button btnPlay = { (Rectangle){ screenWidth/2 - 100, 200, 200, 50 }, "Jogar", false, false };
-Button btnOptions = { (Rectangle){ screenWidth/2 - 100, 300, 200, 50 }, "Opções", false, false };
-Button btnExit = { (Rectangle){ screenWidth/2 - 100, 400, 200, 50 }, "Sair", false, false };
+    Button btnPlay = {(Rectangle){screenWidth / 2 - 100, 200, 200, 50}, "Jogar", false, false};
+    Button btnOptions = {(Rectangle){screenWidth / 2 - 100, 300, 200, 50}, "Opções", false, false};
+    Button btnExit = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Sair", false, false};
 
-        DrawButton(btnPlay);
-        DrawButton(btnOptions);
-        DrawButton(btnExit);
+    DrawButton(btnPlay);
+    DrawButton(btnOptions);
+    DrawButton(btnExit);
 
-        
     /// Verificar cliques
-    if (IsButtonClicked(btnPlay)) {
+    if (IsButtonClicked(btnPlay))
+    {
         // Lógica para quando o botão "Jogar" é clicado
         *currentState = STATE_TELA_INPUT;
-         
     }
-   
-    if (IsButtonClicked(btnExit)) {
+
+    if (IsButtonClicked(btnExit))
+    {
         // Lógica para quando o botão "Sair" é clicado
- 
-        CloseWindow();  // Fechar a janela do Raylib
+
+        CloseWindow(); // Fechar a janela do Raylib
     }
-     
-        
-        
 }
+
+void gameGUI(GameState *currentState)
+{
+
+    ClearBackground(RAYWHITE);
+    Vector2 mousePoint = GetMousePosition();
+    Rectangle buttons[9];
+      char *buttonText[] = {
+        "DAVI GLEDSON", "ALERRANDO", "PROFESSORA CERES", "REGINALDO BATISTA",
+        "ELANIO", "DANIEL LIRA", "MARIANA",
+        "THAFINE", "ANA CAROLYNE"
+    };
+            for (int i = 0; i < 9; i++)
+            {
+                
+                buttons[i] = (Rectangle){10, 10 + i * 50, 180, 40};
+            }
+    for (int i = 0; i < 9; i++)
+    {
+         for (int i = 0; i < 9; i++) {
+                if (CheckCollisionPointRec(mousePoint, buttons[i])) {
+                    DrawRectangleRec(buttons[i], LIGHTGRAY);
+                } else {
+                    DrawRectangleRec(buttons[i], SKYBLUE );
+                }
+
+       
+
+        DrawText(buttonText[i], buttons[i].x + 10, buttons[i].y + 10, 10, BLACK);
+    }
+}
+}
+
 // Função de atualização da tela do menu
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth)
 {
@@ -290,21 +340,25 @@ ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroun
     positions.scrollingFore -= 1.0f;
 
     // Ajustar a posição de rolagem para o efeito contínuo
-    if (positions.scrollingBack <= -backgroundWidth*2) positions.scrollingBack = 0;
-    if (positions.scrollingMid <= -midgroundWidth*2) positions.scrollingMid = 0;
-    if (positions.scrollingFore <= -foregroundWidth*2) positions.scrollingFore = 0;
+    if (positions.scrollingBack <= -backgroundWidth * 2)
+        positions.scrollingBack = 0;
+    if (positions.scrollingMid <= -midgroundWidth * 2)
+        positions.scrollingMid = 0;
+    if (positions.scrollingFore <= -foregroundWidth * 2)
+        positions.scrollingFore = 0;
 
     return positions;
 }
 
 // Função para desenhar um botão
-void DrawButton(Button button) {
+void DrawButton(Button button)
+{
     // Desenhar retângulo do botão
     DrawRectangleRec(button.bounds, button.hovered ? BLUE : DARKBLUE);
 
     // Desenhar texto centralizado no botão
-    DrawText(button.text, button.bounds.x + button.bounds.width/2 - MeasureText(button.text, 20)/2,
-             button.bounds.y + button.bounds.height/2 - 10, 20, WHITE);
+    DrawText(button.text, button.bounds.x + button.bounds.width / 2 - MeasureText(button.text, 20) / 2,
+             button.bounds.y + button.bounds.height / 2 - 10, 20, WHITE);
 }
 
 _Bool IsButtonClicked(Button button)
