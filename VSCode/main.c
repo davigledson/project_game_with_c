@@ -25,7 +25,7 @@ typedef struct
     bool hovered;
     bool clicked;
     Color bounds_color;
-    
+
 } Button;
 
 typedef struct
@@ -34,7 +34,6 @@ typedef struct
     float scrollingMid;
     float scrollingFore;
 } ScrollingPositions;
-
 
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
@@ -78,6 +77,21 @@ int main()
     positions.scrollingBack = -background.width; // Centralizar a textura de fundo
     positions.scrollingMid = -midground.width;
     positions.scrollingFore = -foreground.width;
+
+    int buttonCount = 9;
+    Button buttons[buttonCount];
+    char *buttonText[] = {
+        "DAVI GLEDSON", "ALERRANDO", "PROFESSORA CERES", "REGINALDO BATISTA",
+        "ELANIO", "DANIEL LIRA", "MARIANA",
+        "THAFINE", "ANA CAROLYNE"};
+    for (int i = 0; i < buttonCount; i++)
+    {
+
+        buttons[i].bounds = (Rectangle){10, 80 + i * 50, 280, 40};
+        buttons[i].text = buttonText[i];
+        buttons[i].bounds_color = BLUE;
+        buttons[i].hovered = 1;
+    }
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -149,8 +163,6 @@ int main()
 
             break;
         case STATE_TELA_GAMEPLAY:
-        
-           
 
             break;
         }
@@ -172,7 +184,7 @@ int main()
             inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
-            gameGUI(&currentState,&showText);
+           gameGUI(&currentState, &showText, buttons, &buttonCount);
             break;
         }
 
@@ -305,58 +317,35 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
     }
 }
 
-//Interface gráfica do gameplay
-void gameGUI(GameState *currentState, bool *showText)
+// Interface gráfica do gameplay
+
+void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount)
 {
    
-
-
     ClearBackground(RAYWHITE);
-    Vector2 mousePoint = GetMousePosition();
-    Button buttons[9];
-      char *buttonText[] = {
-        "DAVI GLEDSON", "ALERRANDO", "PROFESSORA CERES", "REGINALDO BATISTA",
-        "ELANIO", "DANIEL LIRA", "MARIANA",
-        "THAFINE", "ANA CAROLYNE"
-    };
-            for (int i = 0; i < 9; i++)
-            {
-                
-                buttons[i].bounds = (Rectangle){10, 10 + i * 50, 180, 40};
-                buttons[i].text = buttonText[i];
-                buttons[i].bounds_color = BLUE;
-                buttons[i].hovered = 1;
-               
-            }
-    for (int i = 0; i < 9; i++) {
-      
-              
-                
-                 if (CheckCollisionPointRec(mousePoint, buttons[i].bounds)) {   
-                  DrawText("Clicado", 10, 10, 20, RED);
-                }  
+   
 
-                DrawButton(buttons[i]);
-         }
-       
-     //DrawText("Clicado", 10, 10, 20, RED);
-    // DesenhatextoDinamico("haaaaaaaaaaaaaaaaaa", 10, 10, 20, RED,1);
-        //DrawText(buttonText[j], buttons[j].x + 10, buttons[j].y + 10, 10, BLACK);
+    DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
 
-
-            // if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&CheckCollisionPointRec(mousePoint, buttons[j])) 
-            //     {
-            //           *showText = true;
-            //     }
-
-            //     if(*showText){
-            //         DrawText("Clicadodsfhjksd", 100, 100, 40, RED);
-            //     }
+    for (int i = 0; i < *buttonCount; i++)
+    {
+        if (IsButtonClicked(buttons[i]))
+        {
+            removeItem(buttons, buttonCount, i);
+        }
+        else
+        {
+            DrawButton(buttons[i]);
+           
+        } 
+        
+        DrawText("OLA", 240 , 140+ (i *40), 60, RED);
+        
         
     }
-//}
 
-
+    
+}
 // Função de atualização da tela do menu
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth)
 {
@@ -379,18 +368,22 @@ ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroun
 void DrawButton(Button button)
 {
     // Desenhar retângulo do botão
-    if(button.hovered){
+    if (button.hovered)
+    {
         Vector2 mousePoint = GetMousePosition();
-         if (CheckCollisionPointRec(mousePoint, button.bounds)){
-          DrawRectangleRec(button.bounds, DARKGRAY);
-         } else {
+        if (CheckCollisionPointRec(mousePoint, button.bounds))
+        {
+            DrawRectangleRec(button.bounds, DARKGRAY);
+        }
+        else
+        {
+            DrawRectangleRec(button.bounds, DARKBLUE);
+        }
+    }
+    else
+    {
         DrawRectangleRec(button.bounds, DARKBLUE);
     }
-
-    } else {
-        DrawRectangleRec(button.bounds, DARKBLUE);
-    }
-     
 
     // Desenhar texto centralizado no botão
     DrawText(button.text, button.bounds.x + button.bounds.width / 2 - MeasureText(button.text, 20) / 2,
@@ -402,8 +395,95 @@ _Bool IsButtonClicked(Button button)
     return (CheckCollisionPointRec(GetMousePosition(), button.bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON));
 }
 
-void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show) {
-    if (show) {
+void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show)
+{
+    if (show)
+    {
         DrawText(text, posX, posY, fontSize, color);
     }
+}
+
+void removeItem(Button buttons[], int *size, int index)
+{
+    if (index < 0 || index >= *size)
+    {
+        return;
+    }
+
+    for (int i = index; i < *size - 1; i++)
+    {
+        buttons[i] = buttons[i + 1];
+    }
+
+    (*size)--;
+}
+
+
+int escolher_vitima(int num_players, int impostor_index) {
+    int victim_index;
+    do {
+        victim_index = rand() % (num_players);
+    } while (victim_index == impostor_index);
+    return victim_index;
+}
+
+
+void remover_jogador(char lista[][50], int *num_players, int index) {
+    for (int j = index; j < *num_players - 1; j++) {
+        strcpy(lista[j], lista[j + 1]);
+    }
+    (*num_players)--;
+}
+
+void verificar_palpite(char lista[][50], int *num_players, char *impostor) {
+    int user_input = obter_palpite(*num_players);
+
+    if (strcmp(lista[user_input], impostor) == 0) {
+        imprimir_vencedor(lista[user_input]);
+        *num_players = 0; // Encerra o jogo
+    } else {
+        printf("====================\n");
+        printf("%s não era o impostor!\n", lista[user_input]);
+        printf("====================\n");
+        remover_jogador(lista, num_players, user_input);
+    }
+}
+
+int obter_palpite(int num_players) {
+    int user_input;
+    printf("Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
+    while (scanf("%d", &user_input) != 1 || user_input < 0 || user_input >= num_players) {
+        while (getchar() != '\n');
+        printf("Entrada inválida. Tente novamente. Quem é o impostor? [digite de 0 até %d]: ", num_players - 1);
+    }
+    return user_input;
+}
+
+void imprimir_sobreviventes(char lista[][50], int num_players) {
+    printf("Os Sobreviventes são:\n");
+    for (int j = 0; j < num_players; j++) {
+        printf(" %s |", lista[j]);
+    }
+    printf("\n");
+}
+
+void imprimir_vencedor(char *impostor) {
+    printf("====================\n");
+    char frase_lenta[50] = " ";
+    strcat(frase_lenta, impostor);
+    strcat(frase_lenta, " era o impostor!");
+    for (int i = 0; frase_lenta[i] != '\0'; i++) {
+        printf("%c", frase_lenta[i]);
+        fflush(stdout);
+        usleep(100000); // Atraso de 100 milissegundos
+    }
+    printf("\n====================\n");
+    printf("Parabéns! VOCÊ GANHOU!\n");
+}
+
+void imprimir_perdedor(char *impostor) {
+    printf("====================\n");
+    printf("%s era o Impostor\n", impostor);
+    printf("====================\n");
+    printf("VOCÊ PERDEU!\n");
 }
