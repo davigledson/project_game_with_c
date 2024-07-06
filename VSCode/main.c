@@ -68,6 +68,7 @@ int main()
     Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
     Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
     Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
+    Texture2D inter_room = LoadTexture("imgs/inter_room.png");
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
     Music music = LoadMusicStream("sounds/amoung_theme.mp3");
@@ -184,7 +185,7 @@ int main()
             inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
-           gameGUI(&currentState, &showText, buttons, &buttonCount);
+           gameGUI(&currentState, &showText, buttons, &buttonCount,inter_room);
             break;
         }
 
@@ -198,6 +199,7 @@ int main()
     UnloadTexture(background);
     UnloadTexture(midground);
     UnloadTexture(foreground);
+    UnloadTexture(inter_room);
     UnloadMusicStream(music); // Descarregar a música
     CloseAudioDevice();       // Fechar a biblioteca de áudio
     CloseWindow();            // Close window and OpenGL context
@@ -319,11 +321,19 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
 
 // Interface gráfica do gameplay
 
-void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount)
+void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount, Texture2D inter_room)
 {
    
+   float scaleX = (float)screenWidth / inter_room.width;
+    float scaleY = (float)screenHeight / inter_room.height;
+    float scale = (scaleX > scaleY) ? scaleX : scaleY;
+float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
+    float backgroundOffsetY = (screenHeight - inter_room.height * scale) / 2;
     ClearBackground(RAYWHITE);
-   
+       DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+
+
+
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
 
@@ -339,7 +349,7 @@ void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *but
            
         } 
         
-        DrawText("OLA", 240 , 140+ (i *40), 60, RED);
+        //DrawText("OLA", 240 , 140+ (i *40), 60, RED);
         
         
     }
