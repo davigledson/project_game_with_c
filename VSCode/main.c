@@ -25,6 +25,7 @@ typedef struct
     bool hovered;
     bool clicked;
     Color bounds_color;
+    char msg[300];
 
 } Button;
 
@@ -62,7 +63,6 @@ int main()
 
     int framesCounter = 0;
 
-    bool showText = false;
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
     Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
@@ -81,15 +81,24 @@ int main()
 
     int buttonCount = 9;
     Button buttons[buttonCount];
+    char theDeadText[200];
+    int showDeathText = 0;
     char *buttonText[] = {
         "DAVI GLEDSON", "ALERRANDO", "PROFESSORA CERES", "REGINALDO BATISTA",
         "ELANIO", "DANIEL LIRA", "MARIANA",
-        "THAFINE", "ANA CAROLYNE"};
+        "Dario", "Heitor"};
+
+        char *DeadText[] = {
+        "Vasco", "Tahles", "PROFESSORA CERES", "Quimica",
+        "AEC", "Matematica", "Estudeeee",
+        "O terror do INSS", "DarkSoul"};
     for (int i = 0; i < buttonCount; i++)
     {
 
         buttons[i].bounds = (Rectangle){10, 80 + i * 50, 280, 40};
         buttons[i].text = buttonText[i];
+       
+        strcpy(buttons[i].msg,DeadText[i]);
         buttons[i].bounds_color = BLUE;
         buttons[i].hovered = 1;
     }
@@ -185,7 +194,7 @@ int main()
             inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
-           gameGUI(&currentState, &showText, buttons, &buttonCount,inter_room);
+           gameGUI(&currentState, &showDeathText, buttons, &buttonCount,inter_room,&theDeadText,&showDeathText);
             break;
         }
 
@@ -321,9 +330,10 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
 
 // Interface gráfica do gameplay
 
-void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount, Texture2D inter_room)
+void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount, Texture2D inter_room,char *theDeadText,int *showDeathText)
 {
    
+   // centralizar a imagem no centro e a escala prencher a tela
    float scaleX = (float)screenWidth / inter_room.width;
     float scaleY = (float)screenHeight / inter_room.height;
     float scale = (scaleX > scaleY) ? scaleX : scaleY;
@@ -337,10 +347,13 @@ float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
 
+    
     for (int i = 0; i < *buttonCount; i++)
     {
         if (IsButtonClicked(buttons[i]))
         {
+            *showDeathText = 1;
+            strcpy(theDeadText, buttons[i].msg);
             removeItem(buttons, buttonCount, i);
         }
         else
@@ -349,11 +362,13 @@ float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
            
         } 
         
-        //DrawText("OLA", 240 , 140+ (i *40), 60, RED);
-        
-        
     }
-
+    if(*showDeathText == 1){
+            DrawText(theDeadText, 240 , 340, 60, RED); 
+        }
+        if(*buttonCount <=2){
+           DrawText("OLA", 240 , 140, 60, RED);  
+        }
     
 }
 // Função de atualização da tela do menu
