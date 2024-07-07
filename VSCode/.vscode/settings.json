@@ -9,7 +9,8 @@
 		"**/*.exe": true,
 	},
 	"files.associations": {
-		"raylib.h": "c"
+		"raylib.h": "c",
+		"system_error": "c"
 	},
 	"workbench.colorCustomizations": {
 		"activityBar.activeBackground": "#1f6fd0",

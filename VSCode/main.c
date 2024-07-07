@@ -25,7 +25,7 @@ typedef struct
     bool hovered;
     bool clicked;
     Color bounds_color;
-    char msg[300];
+    char msg_referente[300];
 
 } Button;
 
@@ -36,6 +36,21 @@ typedef struct
     float scrollingFore;
 } ScrollingPositions;
 
+//para todos os textos únicos para a tela de gameplay, (inclusive texto do gameplay)
+typedef struct
+{   
+    char theDeadText[300];
+    char suspect_msg[300];
+    int tentativas;
+    int qtdPersonagens;
+    bool showDeathText;
+    int culpado_index;
+    int victory;
+    char victory_text[300];
+} TextForGUI;
+
+
+
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
@@ -44,10 +59,10 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-
+     srand(time(NULL));
     GameState currentState = STATE_TELA_GAMEPLAY;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
-
+    
     // STATE = 0; TELA DO MENU
     // STATE = 1; TELA DO INPUT
     // STATE = 2; TELA DA GAMEPLAY
@@ -71,18 +86,26 @@ int main()
     Texture2D inter_room = LoadTexture("imgs/inter_room.png");
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
-    Music music = LoadMusicStream("sounds/amoung_theme.mp3");
+    Music music = LoadMusicStream("sounds/amoung_them.mp3");
     PlayMusicStream(music); // Iniciar a reprodução da música
 
     // **Alteração:**  para não iniciarlizar a tela de menu com uma parte da tela preta
     positions.scrollingBack = -background.width; // Centralizar a textura de fundo
     positions.scrollingMid = -midground.width;
     positions.scrollingFore = -foreground.width;
-
-    int buttonCount = 9;
+    
+    //Variaveis /textos para a tela de gameplay
+    TextForGUI textGameGUI;
+    textGameGUI.tentativas =3;
+    textGameGUI.qtdPersonagens =9;
+    textGameGUI.showDeathText =false;
+    
+    textGameGUI.victory = 0;
+    int buttonCount = textGameGUI.qtdPersonagens;
+    textGameGUI.culpado_index = rand() % buttonCount;
     Button buttons[buttonCount];
-    char theDeadText[200];
-    int showDeathText = 0;
+    
+    
     char *buttonText[] = {
         "DAVI GLEDSON", "ALERRANDO", "PROFESSORA CERES", "REGINALDO BATISTA",
         "ELANIO", "DANIEL LIRA", "MARIANA",
@@ -98,7 +121,7 @@ int main()
         buttons[i].bounds = (Rectangle){10, 80 + i * 50, 280, 40};
         buttons[i].text = buttonText[i];
        
-        strcpy(buttons[i].msg,DeadText[i]);
+        strcpy(buttons[i].msg_referente,DeadText[i]);
         buttons[i].bounds_color = BLUE;
         buttons[i].hovered = 1;
     }
@@ -194,7 +217,7 @@ int main()
             inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
-           gameGUI(&currentState, &showDeathText, buttons, &buttonCount,inter_room,&theDeadText,&showDeathText);
+           gameGUI(&currentState, buttons, &buttonCount,inter_room,&framesCounter,&textGameGUI);
             break;
         }
 
@@ -330,8 +353,9 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
 
 // Interface gráfica do gameplay
 
-void gameGUI(GameState *currentState, bool *showText, Button buttons[], int *buttonCount, Texture2D inter_room,char *theDeadText,int *showDeathText)
+void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI)
 {
+    
    
    // centralizar a imagem no centro e a escala prencher a tela
    float scaleX = (float)screenWidth / inter_room.width;
@@ -346,15 +370,34 @@ float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
 
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
+    char tent_text[2] ;
+    sprintf(tent_text, "%d", textGameGUI->tentativas);
+    DrawText("Tentativas:", 800, 10, 30, BLUE);
+    DrawText(tent_text, 990, 10, 30, BLUE);
 
+    
+    char index[2] ;
+    sprintf(index, "%d", textGameGUI->culpado_index);
+    DrawText("Culpado:", 800, 40, 30, RED);
+    DrawText(index, 990, 40, 30, RED);
     
     for (int i = 0; i < *buttonCount; i++)
     {
         if (IsButtonClicked(buttons[i]))
         {
-            *showDeathText = 1;
-            strcpy(theDeadText, buttons[i].msg);
+            
+            if(i == textGameGUI->culpado_index){
+                textGameGUI->victory = 1;
+            }
+            if(i < textGameGUI->culpado_index) textGameGUI->culpado_index--;
+             textGameGUI->showDeathText = 1;
+
+            strcpy(textGameGUI->theDeadText, buttons[i].msg_referente);
             removeItem(buttons, buttonCount, i);
+           // reinicia o contador de frames (para o texto lento)
+            *framesCounter = 0;
+            //diminue as tentativas
+            textGameGUI->tentativas--;
         }
         else
         {
@@ -363,10 +406,21 @@ float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
         } 
         
     }
-    if(*showDeathText == 1){
-            DrawText(theDeadText, 240 , 340, 60, RED); 
+    if(textGameGUI->showDeathText == 1){
+
+         int lengthToShow = (*framesCounter) / 10;
+        if (lengthToShow > strlen(textGameGUI->theDeadText))
+        {
+            lengthToShow = strlen(textGameGUI->theDeadText);
         }
-        if(*buttonCount <=2){
+        DrawText(TextSubtext(textGameGUI->theDeadText, 0, lengthToShow), 340, 100, 60, RED);
+        (*framesCounter)++; 
+        }
+
+        if(textGameGUI->victory == 1){
+           DrawText("VITORIAAA", 440 , 240, 60, GREEN);  
+        }
+        if(*buttonCount <=6){
            DrawText("OLA", 240 , 140, 60, RED);  
         }
     
