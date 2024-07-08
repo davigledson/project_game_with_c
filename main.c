@@ -72,7 +72,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
      srand(time(NULL));
-    GameState currentState = STATE_TELA_HISTORY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
     
     // STATE = 0; TELA DO MENU
@@ -246,7 +246,7 @@ int main()
            gameGUI(&currentState, buttons, &buttonCount,inter_room,&framesCounter,&textGameGUI);
             break;
             case STATE_TELA_HISTORY:
-           historyGUI(&textHistory,background_history,&framesCounter);
+           historyGUI(&textHistory,background_history,&framesCounter,&currentState);
             break;
         }
 
@@ -382,7 +382,7 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
 }
 
 // Interface gráfica d tela de historia (aonde se dar a dica do suspeito)
-void historyGUI(TextForGUI *textHistory, Texture2D background_history,int *framesCounter){
+void historyGUI(TextForGUI *textHistory, Texture2D background_history,int *framesCounter,GameState *currentState){
        ClearBackground(RAYWHITE);
     //para centralizar imagem
     float scaleX = (float)screenWidth / background_history.width;
@@ -424,6 +424,12 @@ DrawTextureEx(background_history, (Vector2){backgroundOffsetX, backgroundOffsetY
         DrawTextWrapped(font, textHistory->suspect_msg, 
                 (Rectangle){ 300, 200, screenWidth - 350, 200 }, 30.0f, 2.0f, RED);
 
+    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avança", false, false};
+    DrawButton(btnAvanca);
+
+    if(IsButtonClicked(btnAvanca)){
+        *currentState = STATE_TELA_GAMEPLAY;
+    }
      //DrawText("Dica: o suspeito barabaaadsafsadfsadfsafbabasvbsavsv", 300, 200, 30, RED);
      DrawText("Historia...", 10, 10, 30, BLUE);
     // DrawText(, 500, 200, 30, BLUE);
