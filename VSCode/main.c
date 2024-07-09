@@ -44,7 +44,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
 
-    GameState currentState = STATE_TELA_GAMEPLAY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     // STATE = 0; TELA DO MENU
