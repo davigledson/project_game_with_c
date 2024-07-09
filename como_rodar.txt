@@ -1,2 +1,4 @@
-subitituia a pasta VSCode no caminho: C:\raylib\raylib\projects
-nota: se não tem esse caminho, instale o raylib
+der o git clone na pasta
+comando "make"
+comando "./game"
+C:\raylib\raylib\projects\VSCode
