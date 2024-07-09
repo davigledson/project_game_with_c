@@ -16,7 +16,9 @@ typedef enum
     STATE_TELA_HISTORY,
     STATE_TELA_INPUT,
     STATE_TELA_GAMEOVER,
-    STATE_TELA_VITORY
+    STATE_TELA_VITORY,
+    STATE_TELA_RANKING
+
 } GameState;
 // Estrutura para representar um botão
 typedef struct
@@ -60,6 +62,8 @@ typedef struct
 } TextForGUI;
 
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
+float frameTime = 0;
+bool showTime = true;
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth);
@@ -73,7 +77,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_HISTORY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     // STATE = 0; TELA DO MENU
@@ -87,6 +91,8 @@ int main()
     int letterCount = 0;
 
     Rectangle textBox = {screenWidth / 2.0f - 200, 180, 380, 50};
+    
+    bool IsRankingState = false;
     bool mouseOnText = false;
 
     int framesCounter = 0;
@@ -100,10 +106,16 @@ int main()
     Texture2D background_history = LoadTexture("imgs/cena_crime.png");
     Texture2D background_gameover = LoadTexture("imgs/background_gameover.png");
     Texture2D background_victory = LoadTexture("imgs/background_gameover.png");
+    Texture2D rankingTex;
+
+    Font rankingFont = LoadFont("fonts/alagard.ttf");
 
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
-    Music music = LoadMusicStream("sounds/amoung_them.mp3");
+
+    Music music = LoadMusicStream("C:/raylib/raylib/projects/VSCode/sounds/amoung_theme.mp3");
+    Music rankingMusic = LoadMusicStream("C:/raylib/raylib/projects/VSCode/sounds/rankingMusic.mp3");
+
     PlayMusicStream(music); // Iniciar a reprodução da música
 
     // **Alteração:**  para não iniciarlizar a tela de menu com uma parte da tela preta
@@ -141,7 +153,7 @@ int main()
         {"Antonio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
         {"Edvan Leite", "", {"Quem tem intolerância a lactose não é amigo dele"}, 1},
         {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
-        {"TALES GABRIEL", "Bora para o URU", {"Homem dos olhos de vidros By Professor Antônio",}, 2}
+        {"TALES GABRIEL", "Bora para o R.U", {"Homem dos olhos de vidros By Professor Antônio",}, 2}
         
         };
     // embaralhar  todo o array
@@ -169,8 +181,19 @@ int main()
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        // Atualizar a música
-        UpdateMusicStream(music);
+        if (currentState != STATE_TELA_RANKING)
+        {
+           if(IsRankingState)
+           {
+               StopMusicStream(rankingMusic);
+               PlayMusicStream(music);
+               UnloadTexture(rankingTex);
+               ClearBackground(BLACK);
+               IsRankingState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+           }else{
+                UpdateMusicStream(music);
+           }
+        }
         positions = UpdateScrolling(positions, background.width, midground.width, foreground.width);
         switch (currentState)
         {
@@ -238,7 +261,24 @@ int main()
         case STATE_TELA_GAMEPLAY:
 
             break;
-            case STATE_TELA_GAMEOVER:
+        
+        case STATE_TELA_GAMEOVER:
+
+            break;
+
+        case STATE_TELA_RANKING:
+
+            if (!IsRankingState)
+                {
+                    StopMusicStream(music); // Parar a música atual
+                    PlayMusicStream(rankingMusic); // Iniciar a reprodução da música de ranking
+                    rankingTex = LoadTexture("resources/ranking.png");
+                    IsRankingState = true; // Marcar que a música de ranking está tocando
+                }
+                else
+                {
+                    UpdateMusicStream(rankingMusic); // Atualizar a stream da música de ranking
+                }
             
         }
         // Update
@@ -256,20 +296,30 @@ int main()
 
             break;
         case STATE_TELA_INPUT:
+            
             inputGUI(name, letterCount, textBox, mouseOnText, framesCounter, background, midground, foreground, positions, &currentState);
             break;
         case STATE_TELA_GAMEPLAY:
+            
             gameGUI(&currentState, buttons, &buttonCount, inter_room, &framesCounter, &textGameGUI);
             break;
         case STATE_TELA_HISTORY:
+            
             historyGUI(&textHistory, background_history, &framesCounter, &currentState);
             break;
             case STATE_TELA_GAMEOVER:
+            
             gameOverGUI(textGameOver,background_gameover ,&framesCounter, &currentState);
             break;
 
-            case STATE_TELA_VITORY:
+        case STATE_TELA_VITORY:
+            
             gameOverGUI(textVictory,background_victory ,&framesCounter, &currentState);
+            break;
+
+        case STATE_TELA_RANKING:
+
+            rankingGUI(&currentState, &rankingTex, rankingFont);
             break;
         }
        EndDrawing();
@@ -361,6 +411,7 @@ void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOn
 void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, ScrollingPositions positions, GameState *currentState)
 {
 
+    DrawRectangle(0 ,0 , screenWidth, screenHeight, BLACK);
     // Calcular posição para centralizar a textura na tela
     float backgroundOffsetX = (screenWidth - background.width * 2) / 2;
     float backgroundOffsetY = (screenHeight - background.height * 2) / 2;
@@ -395,6 +446,12 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
     {
         // Lógica para quando o botão "Jogar" é clicado
         *currentState = STATE_TELA_HISTORY;
+    }
+
+    if (IsButtonClicked(btnOptions))
+    {
+        // Lógica para quando o botão "Ranking" é clicado
+        *currentState = STATE_TELA_RANKING;
     }
 
     if (IsButtonClicked(btnExit))
@@ -476,6 +533,31 @@ victoryGUI(TextForGUI textVictory, Texture2D background_victory,int framesCounte
 DrawText("Vitoria", 240, 140, 60, GREEN);
 }
 
+void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont)
+{
+    ClearBackground(RAYWHITE);
+    DrawTexture(*rankingTex, 0, 0, WHITE);
+
+    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 580, 200, 50}, "Voltar", false, false, MAROON};
+    FILE *rankingFILE = fopen("ranking.txt", "r");
+
+    for(int Z = 0; Z<10; Z++){
+       
+        char nome[50];
+        fscanf(rankingFILE, "%s", nome);
+        DrawTextEx(rankingFont, nome, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
+        DrawTextEx(rankingFont, nome, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
+    
+    }
+    fclose(rankingFILE);
+
+    DrawButton(btnBack);
+    if(IsButtonClicked(btnBack))
+    {
+        *currentState = STATE_TELA_MENU;
+    }
+  }
+
 // Interface gráfica do gameplay
 
 void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI)
@@ -490,6 +572,12 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     float backgroundOffsetY = (screenHeight - inter_room.height * scale) / 2;
 
     DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+    
+    if (showTime)
+    {
+        frameTime += GetTime();
+        DrawText(TextFormat("Tempo: %02.02f ms", frameTime ), screenWidth/2.5, 50, 20, YELLOW);
+    }
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
     char tent_text[2];
@@ -509,6 +597,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
             if (i == textGameGUI->culpado_index)
             {
+
                 textGameGUI->victory = 1;
             }
             if (i < textGameGUI->culpado_index)
@@ -542,6 +631,8 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     if (textGameGUI->victory == 1)
     {
+        showTime = false;
+        DrawText(TextFormat("Tempo: %02.02f ms", frameTime), screenWidth/2.5, 50, 20, YELLOW);
         DrawText("VITORIAAA", 440, 240, 60, GREEN);
     }
     if (*buttonCount <= 5)
@@ -550,8 +641,6 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         //DrawText("OLA", 240, 140, 60, RED);
     }
 }
-
-
 
 // Função de atualização da tela do menu
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth)
