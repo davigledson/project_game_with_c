@@ -58,10 +58,26 @@ typedef struct
     int culpado_index;
     int victory;
     char victory_text[300];
-    char text[500];
+    char *text;
 } TextForGUI;
 
-// Função de atualização que retorna uma estrutura com as novas posições de rolagem
+typedef struct
+{
+    char *history;
+} History;
+
+typedef struct 
+{
+    char caminho;
+    Texture2D texture1;
+    Texture2D texture2;
+    Texture2D texture3;
+    Vector2 position;
+    Color tint;
+     int width;
+    int height;
+    int currentTexture;
+} Imagem;
 
 typedef struct
 {
@@ -76,8 +92,9 @@ typedef struct
 float frameTime = 0;        
 float totalSeconds; int hours; int minutes;  int seconds;
 Ranking Player_ranking;
-bool showTime = true;
+bool showTime = false;
 bool UpdateRanking = true;
+// Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth);
@@ -85,13 +102,13 @@ static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float font
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);
 // Protótipo da função para desenhar texto com word wrap
 void DrawTextWrapped(Font font, const char *text, Rectangle rec, float fontSize, float spacing, Color tint);
-
+void DesenhaImagemPRO(Imagem *img);
 int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_MENU;
+    GameState currentState = STATE_TELA_GAMEPLAY;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     // STATE = 0; TELA DO MENU
@@ -122,13 +139,22 @@ int main()
     Texture2D background_victory = LoadTexture("imgs/background_gameover.png");
     Texture2D rankingTex;
 
+    Imagem cats;
+    cats.texture1 = LoadTexture("resources/cat_chocado.png");
+    cats.texture2 = LoadTexture("resources/cat_victory.png");
+    cats.texture3 = LoadTexture("resources/cat_serio.png");
+    cats.position = (Vector2){ 800, 300 };
+    cats.tint = WHITE;
+   
+    cats.width = 300;
+    cats.height = 300;
     Font rankingFont = LoadFont("fonts/alagard.ttf");
 
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
 
-    Music music = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/amoung_theme.mp3");
-    Music rankingMusic = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/rankingMusic.mp3");
+    Music music = LoadMusicStream("sounds/amoung_them.mp3");
+    Music rankingMusic = LoadMusicStream("sounds/rankingMusic.mp3");
 
     PlayMusicStream(music); // Iniciar a reprodução da música
 
@@ -153,21 +179,20 @@ int main()
 
     Personagem persons[] = {
         // nome -- frase ao ser selecionado -- dica do suspeito
-        {"Maximiliano Araujo", "Caiu igual o Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
-        {"Henrique Jorge", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
-        {"Ceres Germanna", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
-        {"REGINALDO BATISTA", "Quimica", {"Sua frase no status do whats \"é só sei que nada sei\""}, 1},
-        {"ELANIO", "AEC", {"50 porcento economista"}, 1},
-        {"DANIEL LIRA", "Matemática", {"A menor nota em matemática foi 10 até agora"}, 1},
-        {"FRANKING", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
-        {"Dario", "meus Amigooosss", {"E o inimigo numero 1 do INSS"}, 1},
-        {"Heitor", "Cade o modo fácil do DarkSoul?", {"É fan de DarkSouls"}, 1},
-        {"ALLYSON", "E culpa do Windows", {"Prefiro Linux e gosto de Python"}, 1},
-        {"MAGNUS", "", {"Provavelmente o próximo aluno laureado"}, 1},
-        {"Antonio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
+        {"Prof. Maximiliano Araujo", "fui de Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
+        {"Prof. Henrique Jorge", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
+        {"Prof. Ceres Germanna", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
+        {"REGINALDO BATISTA", "", {"Sua frase no status do whats \"é só sei que nada sei\""}, 1},
+        {"DANIEL LIRA", "", {"A menor nota em matemática foi 10 até agora"}, 1},
+        {"Prof. Frankin", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
+        {"Prof. Dario", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS"}, 1},
+        {"Prof. Heitor", "Cade o modo fácil do DarkSoul?", {"È fan de DarkSouls"}, 1},
+        {"Prof. ALYSSON MENDES", "E culpa do Windows", {"Prefere Linux e gosta de Python"}, 1},
+        {"MAGNUS", "", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez da atualidade"}, 2},
+        {"Prof. Antônio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
         {"Edvan Leite", "", {"Quem tem intolerância a lactose não é amigo dele"}, 1},
-        {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
-        {"TALES GABRIEL", "Bora para o R.U", {"Homem dos olhos de vidros By Professor Antônio",}, 2}
+        {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° Período de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
+        {"TALES GABRIEL", "Bora para o R.U", {"Homem dos olhos de vidros By Professor Antônio",}, 1}
         
         };
     // embaralhar  todo o array
@@ -176,10 +201,22 @@ int main()
     embaralhar(persons, totalCharacters);
     // Variaveis == textos para a tela de historia
     TextForGUI textHistory;
-    strcpy(textHistory.text, "Na UERN, alguém está tentando derrubar os pilares do setor da FANAT, o que se sabe sobre o suspeito é que:");
+   History history_context[] = {
+    
+    {"No laboratório de informática da UERN, vários computadores estão com a foto de Kpops, o que se sabe sobre o culpado é que:"},
+    {"Na UERN, alguém está tentando derrubar os pilares do setor da FANAT, o que se sabe sobre o culpado é que:"},
+    {"Na UERN, alguém deixou a porta de aula aberta fazendo com que vários animais entre, o que se sabe sobre o culpado é que:"},
+    {"Na UERN, alguém fez um gato na energia fazendo com que tivesse um apagão durante dois dias, o que se sabe sobre o culpado é que:"},
+    {"Na UERN, alguém derrubou o Wi-Fi mais uma vez, o que se sabe sobre o culpado é que:"},
+};
+   int total_history_context = sizeof(history_context) / sizeof(history_context[0]);
+
+int indice_da_history = rand() % total_history_context;
+textHistory.text = history_context[indice_da_history].history;
     textHistory.culpado_index = indice_do_culpado;
     int indice_da_dica_do_culpado = rand() % persons[indice_do_culpado].num_hints;
     textHistory.suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
+    textGameGUI.suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
 
     // o for limita o  números de personagem
     for (int i = 0; i < buttonCount; i++)
@@ -310,7 +347,7 @@ int main()
             break;
         case STATE_TELA_GAMEPLAY:
             
-            gameGUI(&currentState, buttons, &buttonCount, inter_room, &framesCounter, &textGameGUI);
+          gameGUI(&currentState, buttons, &buttonCount, inter_room, &framesCounter, &textGameGUI,&cats);
             break;
         case STATE_TELA_HISTORY:
             
@@ -345,6 +382,9 @@ int main()
     UnloadTexture(background_history);
     UnloadTexture(background_gameover);
     UnloadTexture(background_victory);
+    UnloadTexture(cats.texture1);
+    UnloadTexture(cats.texture2);
+    UnloadTexture(cats.texture3);
     UnloadMusicStream(music); // Descarregar a música
     CloseAudioDevice();       // Fechar a biblioteca de áudio
     CloseWindow();            // Close window and OpenGL context
@@ -580,7 +620,7 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
 
 // Interface gráfica do gameplay
 
-void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI)
+void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI, Imagem *cats)
 {
 
     ClearBackground(RAYWHITE);
@@ -591,8 +631,6 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
     float backgroundOffsetY = (screenHeight - inter_room.height * scale) / 2;
 
-    DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
-    
     if (showTime)
     {
         frameTime += GetTime();
@@ -604,18 +642,29 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
         DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
     }
+    DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
+        DrawText("VITORIAAA", 440, 240, 60, GREEN);
+    DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
+    DrawText("Dica:", 10, 50, 30, BLUE);
     char tent_text[2];
     sprintf(tent_text, "%d", textGameGUI->tentativas);
     DrawText("Tentativas:", 800, 10, 30, BLUE);
     DrawText(tent_text, 990, 10, 30, BLUE);
 
-    char index[2];
-    sprintf(index, "%d", textGameGUI->culpado_index);
-    DrawText("Culpado:", 800, 40, 30, RED);
-    DrawText(index, 990, 40, 30, RED);
+    //char index[2];
+    //sprintf(index, "%d", textGameGUI->culpado_index);
+    //DrawText("Culpado:", 800, 40, 30, RED);
+    //DrawText(index, 990, 40, 30, RED);
+    Rectangle container = {600, 40,600,600};
+    //DrawText(textGameGUI->suspect_msg, 600, 40, 30, RED);
+    
 
+    DrawTextBoxed(GetFontDefault(), textGameGUI->suspect_msg,
+                      (Rectangle){container.x + 4, container.y + 4, container.width - 4, container.height - 4},
+                      30.0f, 2.0f, true, RED);
+        
     for (int i = 0; i < *buttonCount; i++)
     {
         if (IsButtonClicked(buttons[i]))
@@ -623,7 +672,6 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
             if (i == textGameGUI->culpado_index)
             {
-
                 textGameGUI->victory = 1;
             }
             if (i < textGameGUI->culpado_index)
@@ -644,40 +692,54 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     }
     if (textGameGUI->showDeathText == 1)
     {
-
+            //DrawText("GATO", 440, 240, 60, GREEN);
+            if(*buttonCount <= 5){
+                // DERROTA
+                 cats->currentTexture =3;
+               DesenhaImagemPRO(cats);
+            } else if(textGameGUI->victory ==1) {
+                //EM CASO DE VITORIA
+                cats->currentTexture =2;
+               DesenhaImagemPRO(cats);
+            } else {
+                //PADRAO
+                cats->currentTexture =1;
+               DesenhaImagemPRO(cats);
+            }
+             
         int lengthToShow = (*framesCounter) / 2;
         if (lengthToShow > strlen(textGameGUI->theDeadText))
         {
             lengthToShow = strlen(textGameGUI->theDeadText);
         }
-        DrawText(TextSubtext(textGameGUI->theDeadText, 0, lengthToShow), 340, 100, 60, RED);
+        // DrawText(TextSubtext(textGameGUI->theDeadText, 0, lengthToShow), screenWidth/2, 100, 30, RED);
+        Rectangle container2 = {screenWidth /2, 200,600,400};
+        DrawTextBoxed(GetFontDefault(), TextSubtext(textGameGUI->theDeadText, 0, lengthToShow),
+                      (Rectangle){container2.x + 4, container2.y + 4, container2.width - 4, container2.height - 4},
+                      30.0f, 2.0f, true, RED);
         (*framesCounter)++;
-        
     }
 
     if (textGameGUI->victory == 1)
-    {
-        showTime = false;
+    {  showTime = false;
         
         Player_ranking.hours = hours;
         Player_ranking.minutes = minutes;
         Player_ranking.seconds = seconds;
 
-        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
-        DrawText("VITORIAAA", 440, 240, 60, GREEN);
-
-        if (UpdateRanking)
+        
+         if (UpdateRanking)
         {
             updateRanking(Player_ranking);
         }
     }
+    
     if (*buttonCount <= 5)
     {
-        *currentState = STATE_TELA_GAMEOVER;
-        //DrawText("OLA", 240, 140, 60, RED);
+        //*currentState = STATE_TELA_GAMEOVER;
+        DrawText("DERROTA", 240, 140, 60, RED);
     }
 }
-
 int updateRanking()
 {
     Ranking ranking[10];
@@ -1022,4 +1084,28 @@ void embaralhar(Personagem *array, int n)
         array[i] = array[j];
         array[j] = temp;
     }
+}
+
+
+void DesenhaImagemPRO(Imagem *img) {
+    Texture2D texture;
+    switch (img->currentTexture) {
+        case 1:
+            texture = img->texture1;
+            break;
+        case 2:
+            texture = img->texture2;
+            break;
+        case 3:
+            texture = img->texture3;
+            break;
+        default:
+            texture = img->texture1;
+            break;
+    }
+    
+    Rectangle sourceRect = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    Rectangle destRect = { img->position.x, img->position.y, (float)img->width, (float)img->height };
+    Vector2 origin = { 0.0f, 0.0f };
+    DrawTexturePro(texture, sourceRect, destRect, origin, 0.0f, img->tint);
 }
