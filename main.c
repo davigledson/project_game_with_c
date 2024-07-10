@@ -62,6 +62,19 @@ typedef struct
 } TextForGUI;
 
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
+
+typedef struct
+{
+    char name[20];
+    int hours;
+    int minutes;
+    int seconds;
+
+} Ranking;
+
+        
+         
+float totalSeconds; int hours; int minutes;  int seconds;
 float frameTime = 0;
 bool showTime = true;
 _Bool IsButtonClicked(Button button);
@@ -113,8 +126,8 @@ int main()
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
 
-    Music music = LoadMusicStream("C:/raylib/raylib/projects/VSCode/sounds/amoung_theme.mp3");
-    Music rankingMusic = LoadMusicStream("C:/raylib/raylib/projects/VSCode/sounds/rankingMusic.mp3");
+    Music music = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/amoung_theme.mp3");
+    Music rankingMusic = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/rankingMusic.mp3");
 
     PlayMusicStream(music); // Iniciar a reprodução da música
 
@@ -147,7 +160,7 @@ int main()
         {"DANIEL LIRA", "Matemática", {"A menor nota em matemática foi 10 até agora"}, 1},
         {"FRANKING", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
         {"Dario", "meus Amigooosss", {"E o inimigo numero 1 do INSS"}, 1},
-        {"Heitor", "Cade o modo fácil do DarkSoul?", {"È fan de DarkSouls"}, 1},
+        {"Heitor", "Cade o modo fácil do DarkSoul?", {"É fan de DarkSouls"}, 1},
         {"ALLYSON", "E culpa do Windows", {"Prefiro Linux e gosto de Python"}, 1},
         {"MAGNUS", "", {"Provavelmente o próximo aluno laureado"}, 1},
         {"Antonio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
@@ -245,17 +258,6 @@ int main()
             else
                 framesCounter = 0;
             //----------------------------------------------------------------------------------
-
-            if (IsKeyPressed(KEY_ENTER))
-            {
-                // EScreve alno no arquivo
-                DrawText("Cdsfsfsdfsdfsfsfdsafsf!", 240, 140, 20, GRAY);
-                FILE *file = fopen("ranking.txt", "a"); // Usar "w" para sobrescrever ou "a" para anexar
-                fprintf(file, "%s\n", name);
-                fclose(file);
-                DrawText(name, (screenWidth / 2) - 50, 10, 40, RED);
-                currentState = STATE_TELA_GAMEPLAY;
-            }
 
             break;
         case STATE_TELA_GAMEPLAY:
@@ -433,9 +435,9 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
 
     // Desenhar título
     // Declaração das variáveis globais
-    Button btnPlay = {(Rectangle){screenWidth / 2 - 100, 200, 200, 50}, "Jogar", false, false};
-    Button btnOptions = {(Rectangle){screenWidth / 2 - 100, 300, 200, 50}, "Ranking", false, false};
-    Button btnExit = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Sair", false, false};
+    Button btnPlay = {(Rectangle){screenWidth / 2 - 100, 200, 200, 50}, "Jogar", false, false, DARKBLUE};
+    Button btnOptions = {(Rectangle){screenWidth / 2 - 100, 300, 200, 50}, "Ranking", false, false, DARKBLUE};
+    Button btnExit = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Sair", false, false, DARKBLUE};
 
     DrawButton(btnPlay);
     DrawButton(btnOptions);
@@ -480,7 +482,7 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
     Rectangle container = {25.0f, 25.0f, screenWidth - 50.0f, screenHeight - 250.0f};
     Rectangle resizer = {container.x + container.width - 17, container.y + container.height - 17, 14, 14};
     Font font = GetFontDefault();
-    Button btn_dica = {(Rectangle){screenWidth / 4 -150 , 300, 800, 50},  textHistory->suspect_msg, 1, 1};
+    Button btn_dica = {(Rectangle){screenWidth / 4 -150 , 300, 800, 50},  textHistory->suspect_msg, 1, 1, DARKBLUE};
     DrawButton(btn_dica);
     // Desenha o retângulo e a caixa de texto
     DrawRectangleLinesEx(container, 3, RED);
@@ -512,12 +514,18 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
    // DrawTextWrapped(font, textHistory->suspect_msg,
                     //(Rectangle){300, 200, screenWidth - 350, 200}, 30.0f, 2.0f, RED);
 
-    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avança", false, false};
+    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 460, 200, 50}, "Voltar", false, false, MAROON};
+    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avança", false, false,DARKBLUE};
     DrawButton(btnAvanca);
+    DrawButton(btnBack);
 
     if (IsButtonClicked(btnAvanca))
     {
         *currentState = STATE_TELA_GAMEPLAY;
+    }
+    if (IsButtonClicked(btnBack))
+    {
+        *currentState = STATE_TELA_MENU;
     }
     // DrawText("Dica: o suspeito barabaaadsafsadfsadfsafbabasvbsavsv", 300, 200, 30, RED);
     DrawText("Historia...", 10, 10, 30, BLUE);
@@ -538,8 +546,8 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
     ClearBackground(RAYWHITE);
     DrawTexture(*rankingTex, 0, 0, WHITE);
 
-    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 580, 200, 50}, "Voltar", false, false, MAROON};
-    FILE *rankingFILE = fopen("ranking.txt", "r");
+    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 590, 200, 50}, "Voltar", false, false, MAROON};
+    FILE *rankingFILE = fopen("ranking.txt", "rb");
 
     for(int Z = 0; Z<10; Z++){
        
@@ -576,7 +584,13 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     if (showTime)
     {
         frameTime += GetTime();
-        DrawText(TextFormat("Tempo: %02.02f ms", frameTime ), screenWidth/2.5, 50, 20, YELLOW);
+
+        totalSeconds = frameTime / 1000.0f;
+        hours = (int)(totalSeconds / 3600);
+        minutes = (int)(totalSeconds / 60) - (hours * 60);
+        seconds = (int)totalSeconds - (hours * 3600) - (minutes * 60);
+
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
     }
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
@@ -632,8 +646,12 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     if (textGameGUI->victory == 1)
     {
         showTime = false;
-        DrawText(TextFormat("Tempo: %02.02f ms", frameTime), screenWidth/2.5, 50, 20, YELLOW);
+        Ranking Player_ranking = {hours, minutes, seconds};
+
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
         DrawText("VITORIAAA", 440, 240, 60, GREEN);
+
+        updateRanking(Player_ranking);
     }
     if (*buttonCount <= 5)
     {
@@ -642,6 +660,68 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     }
 }
 
+int updateRanking(Ranking Player_ranking)
+{
+    Ranking ranking[10];
+    FILE *rankingFILE;
+
+    if((rankingFILE = fopen("ranking.txt", "rb+")) == NULL)
+    {
+        return -1;
+    }
+
+    size_t readCount = fread(ranking, sizeof(Ranking), 10, rankingFILE);
+    if (readCount < 10)
+    {
+        for (size_t i = readCount; i < 10; i++) {
+        ranking[i] = (Ranking){0, 0, 0};
+    }
+    }
+
+    if(Player_ranking.hours < ranking[9].hours || Player_ranking.hours == ranking[9].hours)
+    {
+         if(Player_ranking.minutes < ranking[9].minutes ||Player_ranking.minutes == ranking[9].minutes)
+         {
+                if(Player_ranking.seconds < ranking[9].seconds)
+                {
+                    ranking[9] = Player_ranking;
+                }
+         }
+           
+    }else{
+        
+        fclose(rankingFILE);
+        return 1;
+    }
+
+    int inserted = 0;
+    for(int i = 0; i < 9; i++)
+    {
+        if(Player_ranking.hours < ranking[i].hours || Player_ranking.hours == ranking[i].hours)
+        {
+            if(Player_ranking.minutes < ranking[i].minutes ||Player_ranking.minutes == ranking[i].minutes)
+            {  
+                if(Player_ranking.seconds < ranking[i].seconds)
+                {
+                    for (int j = 9; j > i; j--) {
+                        ranking[j] = ranking[j-1];
+                    }
+                    ranking[i] = Player_ranking;
+                    inserted = 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (inserted) {
+        fseek(rankingFILE, 0, SEEK_SET);
+        fwrite(ranking, sizeof(Ranking), 10, rankingFILE);
+    }
+
+    fclose(rankingFILE);
+    return 0;
+}
 // Função de atualização da tela do menu
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth)
 {
@@ -673,12 +753,12 @@ void DrawButton(Button button)
         }
         else
         {
-            DrawRectangleRec(button.bounds, DARKBLUE);
+            DrawRectangleRec(button.bounds, button.bounds_color);
         }
     }
     else
     {
-        DrawRectangleRec(button.bounds, DARKBLUE);
+        DrawRectangleRec(button.bounds, button.bounds_color);
     }
 
     // Desenhar texto centralizado no botão
