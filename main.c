@@ -73,10 +73,11 @@ typedef struct
 } Ranking;
 
         
-         
+float frameTime = 0;        
 float totalSeconds; int hours; int minutes;  int seconds;
-float frameTime = 0;
+Ranking Player_ranking;
 bool showTime = true;
+bool UpdateRanking = true;
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
 ScrollingPositions UpdateScrolling(ScrollingPositions positions, float backgroundWidth, float midgroundWidth, float foregroundWidth);
@@ -259,6 +260,12 @@ int main()
                 framesCounter = 0;
             //----------------------------------------------------------------------------------
 
+             if (IsKeyPressed(KEY_ENTER))
+            {
+                strcpy(Player_ranking.name, name);
+                currentState = STATE_TELA_HISTORY;
+            }
+
             break;
         case STATE_TELA_GAMEPLAY:
 
@@ -380,7 +387,6 @@ void inputGUI(const char *name, int letterCount, Rectangle textBox, bool mouseOn
     DrawTextureEx(foreground, (Vector2){backgroundOffsetX + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
     DrawTextureEx(foreground, (Vector2){backgroundOffsetX + foreground.width * 2 + positions.scrollingFore, backgroundOffsetY + 50}, 0.0f, 2.0f, WHITE);
 
-    DrawText(name, (screenWidth / 2) - 50, 10, 40, RED);
 
     DrawText("Detetive", 10, 10, 20, RED);
     DrawText("(c) Detetive Environment by PassaDisciplina ", screenWidth - 330, screenHeight - 20, 10, RAYWHITE);
@@ -447,7 +453,7 @@ void menuGUI(Texture2D background, Texture2D midground, Texture2D foreground, Sc
     if (IsButtonClicked(btnPlay))
     {
         // Lógica para quando o botão "Jogar" é clicado
-        *currentState = STATE_TELA_HISTORY;
+        *currentState = STATE_TELA_INPUT;
     }
 
     if (IsButtonClicked(btnOptions))
@@ -549,22 +555,28 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
     Button btnBack = {(Rectangle){screenWidth / 2 - 100, 590, 200, 50}, "Voltar", false, false, MAROON};
     FILE *rankingFILE = fopen("ranking.txt", "rb");
 
-    for(int Z = 0; Z<10; Z++){
-       
-        char nome[50];
-        fscanf(rankingFILE, "%s", nome);
-        DrawTextEx(rankingFont, nome, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
-        DrawTextEx(rankingFont, nome, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
-    
+    if (rankingFILE != NULL)
+    {
+        Ranking ranking[10];
+        size_t readCount = fread(ranking, sizeof(Ranking), 10, rankingFILE);
+
+        for(int Z = 0; Z < readCount; Z++)
+        {
+            char displayText[100];
+            sprintf(displayText, "%s - %02d:%02d:%02d", ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
+        }
+
+        fclose(rankingFILE);
     }
-    fclose(rankingFILE);
 
     DrawButton(btnBack);
     if(IsButtonClicked(btnBack))
     {
         *currentState = STATE_TELA_MENU;
     }
-  }
+}
 
 // Interface gráfica do gameplay
 
@@ -646,12 +658,18 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     if (textGameGUI->victory == 1)
     {
         showTime = false;
-        Ranking Player_ranking = {hours, minutes, seconds};
+        
+        Player_ranking.hours = hours;
+        Player_ranking.minutes = minutes;
+        Player_ranking.seconds = seconds;
 
         DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
         DrawText("VITORIAAA", 440, 240, 60, GREEN);
 
-        updateRanking(Player_ranking);
+        if (UpdateRanking)
+        {
+            updateRanking(Player_ranking);
+        }
     }
     if (*buttonCount <= 5)
     {
@@ -660,12 +678,12 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     }
 }
 
-int updateRanking(Ranking Player_ranking)
+int updateRanking()
 {
     Ranking ranking[10];
     FILE *rankingFILE;
 
-    if((rankingFILE = fopen("ranking.txt", "rb+")) == NULL)
+    if((rankingFILE = fopen("ranking.txt", "r+b")) == NULL)
     {
         return -1;
     }
@@ -674,8 +692,8 @@ int updateRanking(Ranking Player_ranking)
     if (readCount < 10)
     {
         for (size_t i = readCount; i < 10; i++) {
-        ranking[i] = (Ranking){0, 0, 0};
-    }
+        ranking[i] = (Ranking){"NULL", 99, 99, 99};
+        }
     }
 
     if(Player_ranking.hours < ranking[9].hours || Player_ranking.hours == ranking[9].hours)
@@ -684,7 +702,10 @@ int updateRanking(Ranking Player_ranking)
          {
                 if(Player_ranking.seconds < ranking[9].seconds)
                 {
-                    ranking[9] = Player_ranking;
+                    strcpy(ranking[9].name, Player_ranking.name);
+                    ranking[9].hours = Player_ranking.hours;
+                    ranking[9].minutes = Player_ranking.minutes;
+                    ranking[9].seconds = Player_ranking.seconds;
                 }
          }
            
@@ -706,7 +727,10 @@ int updateRanking(Ranking Player_ranking)
                     for (int j = 9; j > i; j--) {
                         ranking[j] = ranking[j-1];
                     }
-                    ranking[i] = Player_ranking;
+                    strcpy(ranking[i].name, Player_ranking.name);
+                    ranking[i].hours = Player_ranking.hours;
+                    ranking[i].minutes = Player_ranking.minutes;
+                    ranking[i].seconds = Player_ranking.seconds;
                     inserted = 1;
                     break;
                 }
@@ -714,12 +738,17 @@ int updateRanking(Ranking Player_ranking)
         }
     }
 
-    if (inserted) {
+    if (inserted)
+    {
         fseek(rankingFILE, 0, SEEK_SET);
         fwrite(ranking, sizeof(Ranking), 10, rankingFILE);
+
     }
 
+    UpdateRanking = false;
+
     fclose(rankingFILE);
+
     return 0;
 }
 // Função de atualização da tela do menu
