@@ -92,7 +92,7 @@ typedef struct
 float frameTime = 0;        
 float totalSeconds; int hours; int minutes;  int seconds;
 Ranking Player_ranking;
-bool showTime = false;
+bool showTime = true;
 bool UpdateRanking = true;
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
@@ -211,8 +211,8 @@ int main()
 };
    int total_history_context = sizeof(history_context) / sizeof(history_context[0]);
 
-int indice_da_history = rand() % total_history_context;
-textHistory.text = history_context[indice_da_history].history;
+    int indice_da_history = rand() % total_history_context;
+    textHistory.text = history_context[indice_da_history].history;
     textHistory.culpado_index = indice_do_culpado;
     int indice_da_dica_do_culpado = rand() % persons[indice_do_culpado].num_hints;
     textHistory.suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
@@ -631,6 +631,8 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     float backgroundOffsetX = (screenWidth - inter_room.width * scale) / 2;
     float backgroundOffsetY = (screenHeight - inter_room.height * scale) / 2;
 
+    DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+
     if (showTime)
     {
         frameTime += GetTime();
@@ -640,11 +642,8 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         minutes = (int)(totalSeconds / 60) - (hours * 60);
         seconds = (int)totalSeconds - (hours * 3600) - (minutes * 60);
 
-        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
-    }
-    DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/2.5, 50, 20, YELLOW);
-        DrawText("VITORIAAA", 440, 240, 60, GREEN);
-    DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/3, 80, 20, YELLOW);
+    } 
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
     DrawText("Dica:", 10, 50, 30, BLUE);
@@ -721,8 +720,10 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     }
 
     if (textGameGUI->victory == 1)
-    {  showTime = false;
+    { 
         
+        showTime = false;
+
         Player_ranking.hours = hours;
         Player_ranking.minutes = minutes;
         Player_ranking.seconds = seconds;
@@ -730,7 +731,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         
          if (UpdateRanking)
         {
-            updateRanking(Player_ranking);
+            updateRanking();
         }
     }
     
