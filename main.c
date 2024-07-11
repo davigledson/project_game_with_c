@@ -108,7 +108,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_GAMEPLAY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     // STATE = 0; TELA DO MENU
@@ -153,8 +153,8 @@ int main()
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
 
-    Music music = LoadMusicStream("sounds/amoung_them.mp3");
-    Music rankingMusic = LoadMusicStream("sounds/rankingMusic.mp3");
+    Music music = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/amoung_theme.mp3");
+    Music rankingMusic = LoadMusicStream("C:/Users/cliente/Documents/GitHub/project_game_with_c/sounds/rankingMusic.mp3");
 
     PlayMusicStream(music); // Iniciar a reprodução da música
 
@@ -603,12 +603,12 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
         for(int Z = 0; Z < readCount; Z++)
         {
             char displayText[100];
-            sprintf(displayText, "%s - %02d:%02d:%02d", ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
+            sprintf(displayText, "#%d.%s - %02d:%02d:%02d", Z+1, ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 70 + Z * 35 + 5}, 40, 2, BLACK);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 70 + Z * 35}, 40, 2, ORANGE);
         }
 
-        fclose(rankingFILE);
+        fclose(rankingFILE);    
     }
 
     DrawButton(btnBack);
