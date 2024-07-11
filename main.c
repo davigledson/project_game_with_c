@@ -46,6 +46,10 @@ typedef struct
     char *suspect_text[MAX_DICAS];
     int num_hints;
 } Personagem;
+typedef struct {
+    int index;
+    bool selected;
+} SuspeitoSelecionado;
 
 // para todos os textos únicos para a tela de gameplay, (inclusive texto do gameplay)
 typedef struct
@@ -59,6 +63,7 @@ typedef struct
     int victory;
     char victory_text[300];
     char *text;
+    int index_botao_clicado;
 } TextForGUI;
 
 typedef struct
@@ -108,17 +113,12 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_MENU;
+    GameState currentState = STATE_TELA_GAMEPLAY;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
-
-    // STATE = 0; TELA DO MENU
-    // STATE = 1; TELA DO INPUT
-    // STATE = 2; TELA DA GAMEPLAY
-    // STATE = 4; TELA DA RANKING
 
     InitWindow(screenWidth, screenHeight, "Detetive");
 
-    char name[MAX_INPUT_CHARS + 1] = "\0"; // NOTE: One extra space required for null terminator char '\0'
+    char name[MAX_INPUT_CHARS + 1] = "\0";
     int letterCount = 0;
 
     Rectangle textBox = {screenWidth / 2.0f - 200, 180, 380, 50};
@@ -158,7 +158,7 @@ int main()
 
     PlayMusicStream(music); // Iniciar a reprodução da música
 
-    // **Alteração:**  para não iniciarlizar a tela de menu com uma parte da tela preta
+    // Alteração:  para não inicializar a tela de menu com uma parte da tela preta
     positions.scrollingBack = -background.width; // Centralizar a textura de fundo
     positions.scrollingMid = -midground.width;
     positions.scrollingFore = -foreground.width;
@@ -228,6 +228,7 @@ int main()
         buttons[i].bounds_color = BLUE;
         buttons[i].hovered = 1;
     }
+   // renderizarBotoesPersonagens(buttons, buttonCount, persons); 
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -347,7 +348,7 @@ int main()
             break;
         case STATE_TELA_GAMEPLAY:
             
-          gameGUI(&currentState, buttons, &buttonCount, inter_room, &framesCounter, &textGameGUI,&cats);
+          gameGUI(&currentState, buttons, &buttonCount, inter_room, &framesCounter, &textGameGUI,&cats,&persons);
             break;
         case STATE_TELA_HISTORY:
             
@@ -620,7 +621,7 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
 
 // Interface gráfica do gameplay
 
-void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI, Imagem *cats)
+void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI, Imagem *cats, Personagem *persons)
 {
 
     ClearBackground(RAYWHITE);
@@ -642,7 +643,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         minutes = (int)(totalSeconds / 60) - (hours * 60);
         seconds = (int)totalSeconds - (hours * 3600) - (minutes * 60);
 
-        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/3, 80, 20, YELLOW);
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/3, 10, 30, YELLOW);
     } 
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
@@ -652,10 +653,10 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     DrawText("Tentativas:", 800, 10, 30, BLUE);
     DrawText(tent_text, 990, 10, 30, BLUE);
 
-    //char index[2];
-    //sprintf(index, "%d", textGameGUI->culpado_index);
-    //DrawText("Culpado:", 800, 40, 30, RED);
-    //DrawText(index, 990, 40, 30, RED);
+    char index[2];
+    sprintf(index, "%d", textGameGUI->culpado_index);
+    DrawText("Culpado:", 800, 170, 30, RED);
+    DrawText(index, 990, 170, 30, RED);
     Rectangle container = {600, 40,600,600};
     //DrawText(textGameGUI->suspect_msg, 600, 40, 30, RED);
     
@@ -668,10 +669,12 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     {
         if (IsButtonClicked(buttons[i]))
         {
-
+            textGameGUI->index_botao_clicado = i;
             if (i == textGameGUI->culpado_index)
             {
                 textGameGUI->victory = 1;
+            } else {
+                textGameGUI->tentativas--;
             }
             if (i < textGameGUI->culpado_index)
                 textGameGUI->culpado_index--;
@@ -682,28 +685,50 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
             // reinicia o contador de frames (para o texto lento)
             *framesCounter = 0;
             // diminue as tentativas
-            textGameGUI->tentativas--;
+           
         }
         else
         {
             DrawButton(buttons[i]);
         }
     }
+     
     if (textGameGUI->showDeathText == 1)
     {
+        Button btnContinua = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Continua", false, false, ORANGE};
             //DrawText("GATO", 440, 240, 60, GREEN);
-            if(*buttonCount <= 5){
+            if(textGameGUI->tentativas==0){
                 // DERROTA
-                 cats->currentTexture =3;
+                 cats->currentTexture = 3;
                DesenhaImagemPRO(cats);
             } else if(textGameGUI->victory ==1) {
                 //EM CASO DE VITORIA
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
-            } else {
+
+               DrawButton(btnContinua);
+               if(IsButtonClicked(btnContinua)){
+                
+                 
+    int totalCharacters = sizeof(persons) / sizeof(persons[0]);
+                //embaralhar(persons, totalCharacters);
+                GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
+                //renderizarBotoesPersonagens(buttons, *buttonCount, persons); 
+
+
+                textGameGUI->victory = 0; // Reseta o estado de victory
+               
+                textGameGUI->showDeathText = 0;
+
+                //*currentState = STATE_TELA_GAMEPLAY;
+                //DrawText("CLICADO:", 400, 200, 30, ORANGE);
+               }
+
+            } else if(textGameGUI->victory != 1){
                 //PADRAO
                 cats->currentTexture =1;
                DesenhaImagemPRO(cats);
+                
             }
              
         int lengthToShow = (*framesCounter) / 2;
@@ -735,11 +760,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         }
     }
     
-    if (*buttonCount <= 5)
-    {
-        //*currentState = STATE_TELA_GAMEOVER;
-        DrawText("DERROTA", 240, 140, 60, RED);
-    }
+    
 }
 int updateRanking()
 {
@@ -1033,7 +1054,7 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
             textOffsetX += glyphWidth; // avoid leading spaces
     }
 }
-#include "raylib.h"
+//#include "raylib.h"
 
 // Função para desenhar texto com word wrap dentro dos limites do retângulo
 void DrawTextWrapped(Font font, const char *text, Rectangle rec, float fontSize, float spacing, Color tint)
@@ -1109,4 +1130,23 @@ void DesenhaImagemPRO(Imagem *img) {
     Rectangle destRect = { img->position.x, img->position.y, (float)img->width, (float)img->height };
     Vector2 origin = { 0.0f, 0.0f };
     DrawTexturePro(texture, sourceRect, destRect, origin, 0.0f, img->tint);
+}
+
+void GerarNovoSuspeito(TextForGUI *textGameGUI, Personagem *persons, int numPersons) {
+    int indice_do_culpado = rand() % numPersons;
+    int indice_da_dica_do_culpado = rand() % persons[indice_do_culpado].num_hints;
+
+    textGameGUI->suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
+    textGameGUI->culpado_index = indice_do_culpado;
+}
+void renderizarBotoesPersonagens(Button buttons[], int buttonCount, Personagem persons[]) {
+    int totalCharacters = sizeof(persons) / sizeof(persons[0]);
+    embaralhar(persons, totalCharacters);
+    for (int i = 0; i < buttonCount; i++) {
+        buttons[i].bounds = (Rectangle){10, 80 + i * 50, 280, 40};
+        buttons[i].text = persons[i].name_person;
+        strcpy(buttons[i].msg_referente, persons[i].DeadText);
+        buttons[i].bounds_color = BLUE;
+        buttons[i].hovered = 1;
+    }
 }
