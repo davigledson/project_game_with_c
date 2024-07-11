@@ -108,7 +108,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_GAMEPLAY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     // STATE = 0; TELA DO MENU
@@ -153,7 +153,7 @@ int main()
     // IMPLEMENTA A LOGICA DAS INTERFACES
     InitAudioDevice();
 
-    Music music = LoadMusicStream("sounds/amoung_them.mp3");
+    Music music = LoadMusicStream("sounds/amoung_theme.mp3");
     Music rankingMusic = LoadMusicStream("sounds/rankingMusic.mp3");
 
     PlayMusicStream(music); // Iniciar a reprodução da música
