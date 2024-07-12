@@ -1,6 +1,7 @@
 
 #include "raylib.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h> // Incluir a biblioteca para o tipo bool
@@ -127,6 +128,7 @@ int main()
     
     bool IsRankingState = false;
     bool mouseOnText = false;
+    bool IsgameoverState = false;
 
     int framesCounter = 0;
 
@@ -136,8 +138,8 @@ int main()
     Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
     Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
     Texture2D inter_room = LoadTexture("imgs/inter_room.png");
-    Texture2D background_history = LoadTexture("imgs/cena_crime.png");
-    Texture2D background_gameover = LoadTexture("imgs/background_gameover.png");
+    Texture2D background_history = LoadTexture("imgs/historiatema.png");
+    Texture2D gameoverTex = LoadTexture("imgs/ana.png");
     Texture2D background_victory = LoadTexture("imgs/background_gameover.png");
     Texture2D rankingTex;
 
@@ -157,6 +159,7 @@ int main()
 
     Music music = LoadMusicStream("sounds/amoung_theme.mp3");
     Music rankingMusic = LoadMusicStream("sounds/rankingMusic.mp3");
+    Music gameovermusic = LoadMusicStream("sounds/gameoversong.mp3");
 
     PlayMusicStream(music); // Iniciar a reprodução da música
 
@@ -260,6 +263,17 @@ int main()
                 UpdateMusicStream(music);
            }
         }
+        if (currentState != STATE_TELA_GAMEOVER){
+           if(IsgameoverState){
+               StopMusicStream(gameovermusic);
+               PlayMusicStream(music);
+               UnloadTexture(gameoverTex);
+               ClearBackground(BLACK);
+               IsgameoverState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+           }else{
+                UpdateMusicStream(music);
+           }
+        }
         positions = UpdateScrolling(positions, background.width, midground.width, foreground.width);
         switch (currentState)
         {
@@ -324,6 +338,14 @@ int main()
             break;
         
         case STATE_TELA_GAMEOVER:
+        if (!IsgameoverState){
+                    StopMusicStream(music); 
+                    PlayMusicStream(gameovermusic);
+                    IsgameoverState = true; 
+                }else{
+                    UpdateMusicStream(gameovermusic); 
+                }
+            
 
             break;
 
@@ -370,7 +392,7 @@ int main()
             break;
             case STATE_TELA_GAMEOVER:
             
-            gameOverGUI(textGameOver,background_gameover ,&framesCounter, &currentState);
+            gameOverGUI(textGameOver,gameoverTex ,&framesCounter, &currentState);
             break;
 
         case STATE_TELA_VITORY:
@@ -395,7 +417,7 @@ int main()
     UnloadTexture(foreground);
     UnloadTexture(inter_room);
     UnloadTexture(background_history);
-    UnloadTexture(background_gameover);
+    UnloadTexture(gameoverTex);
     UnloadTexture(background_victory);
     UnloadTexture(cats.texture1);
     UnloadTexture(cats.texture2);
@@ -576,7 +598,7 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
                     //(Rectangle){300, 200, screenWidth - 350, 200}, 30.0f, 2.0f, RED);
 
     Button btnBack = {(Rectangle){screenWidth / 2 - 100, 460, 200, 50}, "Voltar", false, false, MAROON};
-    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avança", false, false,DARKBLUE};
+    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avançar", false, false,DARKBLUE};
     DrawButton(btnAvanca);
     DrawButton(btnBack);
 
@@ -592,15 +614,30 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
     DrawText("Historia...", 10, 10, 30, BLUE);
     // DrawText(, 500, 200, 30, BLUE);
 }
-gameOverGUI(TextForGUI textGameOver, Texture2D background_gameover,int framesCounter, GameState *currentState){
-    ClearBackground(RAYWHITE);
-DrawText("Game Over", 240, 140, 60, RED);
-}
 
-victoryGUI(TextForGUI textVictory, Texture2D background_victory,int framesCounter, GameState *currentState){
+void victoryGUI(TextForGUI textVictory, Texture2D background_victory,int framesCounter, GameState *currentState){
     ClearBackground(RAYWHITE);
 DrawText("Vitoria", 240, 140, 60, GREEN);
 }
+void gameOverGUI(TextForGUI textGameOver, Texture2D gameoverTex,int framesCounter, GameState *currentState){
+    ClearBackground(RAYWHITE);
+    float scaleX = (float)screenWidth / gameoverTex.width;
+    float scaleY = (float)screenHeight / gameoverTex.height;
+    float scale = (scaleX > scaleY) ? scaleX : scaleY;
+    float backgroundOffsetX = (screenWidth - gameoverTex.width * scale) / 3;
+    float backgroundOffsetY = (screenHeight - gameoverTex.height * scale) / 3;
+
+    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
+    
+
+    DrawTextureEx(gameoverTex, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+    DrawButton(btnBack);
+    if(IsButtonClicked(btnBack)){
+        
+        *currentState = STATE_TELA_MENU;
+    }
+}
+
 
 void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont)
 {
@@ -698,6 +735,10 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 textGameGUI->victory = 1;
             } else {
                 textGameGUI->tentativas--;
+                if (textGameGUI->tentativas == 0){
+                    *currentState = STATE_TELA_GAMEOVER;
+                    return;
+                }
             }
             // if (i < textGameGUI->culpado_index)
             //     textGameGUI->culpado_index--;
