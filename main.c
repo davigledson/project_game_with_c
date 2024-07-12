@@ -65,6 +65,7 @@ typedef struct
     char *text;
     int index_botao_clicado;
     Button botoes[9];
+    int sequencia_de_acertos;
 } TextForGUI;
 
 typedef struct
@@ -220,6 +221,7 @@ int main()
     int indice_da_dica_do_culpado = rand() % persons[indice_do_culpado].num_hints;
     textHistory.suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
     textGameGUI.suspect_msg = persons[indice_do_culpado].suspect_text[indice_da_dica_do_culpado];
+    textGameGUI.sequencia_de_acertos =0;
 
     // // o for limita o  números de personagem
     // for (int i = 0; i < buttonCount; i++)
@@ -660,15 +662,24 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
     DrawText("Dica:", 10, 50, 30, BLUE);
+
     char tent_text[2];
     sprintf(tent_text, "%d", textGameGUI->tentativas);
     DrawText("Tentativas:", 800, 10, 30, BLUE);
     DrawText(tent_text, 990, 10, 30, BLUE);
 
-    char index[2];
-    sprintf(index, "%d", textGameGUI->culpado_index);
-    DrawText("Culpado:", 800, 170, 30, RED);
-    DrawText(index, 990, 170, 30, RED);
+    char acertos[2];
+    sprintf(acertos, "%d", textGameGUI->sequencia_de_acertos);
+    DrawText("Sequencia de acertos:", 800, screenHeight -50, 30, ORANGE);
+    DrawText(acertos, 1150, screenHeight -50, 30, ORANGE);
+
+    // char index[2];
+    // sprintf(index, "%d", textGameGUI->culpado_index);
+    // DrawText("Culpado:", 800, 170, 30, RED);
+    // DrawText(index, 990, 170, 30, RED);
+    //DrawText(index, 990, 170, 30, RED);
+    
+
     Rectangle container = {600, 40,600,600};
     //DrawText(textGameGUI->suspect_msg, 600, 40, 30, RED);
     
@@ -714,24 +725,18 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                  cats->currentTexture = 3;
                DesenhaImagemPRO(cats);
             } else if(textGameGUI->victory ==1) {
-                //EM CASO DE VITORIA
+                //EM CASO DE ACERTO
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
 
                DrawButton(btnContinua);
                if(IsButtonClicked(btnContinua)){
-                
-                 
-    //int totalCharacters = sizeof(persons) / sizeof(persons[0]);
-                //embaralhar(persons, totalCharacters);
+       
                 GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
-                //renderizarBotoesPersonagens(buttons, *buttonCount, persons); 
-                 //RenderizarBotoes(textGameGUI, buttonCount);
-
-
-                textGameGUI->victory = 0; // Reseta o estado de victory
-               
-                textGameGUI->showDeathText = 0;
+                    textGameGUI->victory = 0; 
+                    textGameGUI->showDeathText = 0;
+                    textGameGUI->sequencia_de_acertos++;
+                
 
                 //*currentState = STATE_TELA_GAMEPLAY;
                 //DrawText("CLICADO:", 400, 200, 30, ORANGE);
@@ -757,7 +762,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         (*framesCounter)++;
     }
 
-    if (textGameGUI->victory == 1)
+    if (textGameGUI->sequencia_de_acertos == 10)
     { 
         
         showTime = false;
