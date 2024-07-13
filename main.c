@@ -47,6 +47,7 @@ typedef struct
     char *suspect_text[MAX_DICAS];
     int num_hints;
 } Personagem;
+
 typedef struct {
     int index;
     bool selected;
@@ -96,12 +97,21 @@ typedef struct
 
 } Ranking;
 
-        
-float frameTime = 0;        
-float totalSeconds; int hours; int minutes;  int seconds;
 Ranking Player_ranking;
-bool showTime = true;
-bool UpdateRanking = true;
+
+struct Update
+{
+    float frameTime;
+    float totalSeconds;
+    int hours;
+    int minutes;
+    int seconds;
+    bool showTime;
+    bool ranking;
+
+}Update = {0,0,0,0,0,true,true} ;
+
+     
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
@@ -685,16 +695,16 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
 
-    if (showTime)
+    if (Update.showTime)
     {
-        frameTime += GetTime();
+        Update.frameTime += GetTime();
 
-        totalSeconds = frameTime / 1000.0f;
-        hours = (int)(totalSeconds / 3600);
-        minutes = (int)(totalSeconds / 60) - (hours * 60);
-        seconds = (int)totalSeconds - (hours * 3600) - (minutes * 60);
+        Update.totalSeconds = Update.frameTime / 1000.0f;
+        Update.hours = (int)(Update.totalSeconds / 3600);
+        Update.minutes = (int)(Update.totalSeconds / 60) - (Update.hours * 60);
+        Update.seconds = (int)Update.totalSeconds - (Update.hours * 3600) - (Update.minutes * 60);
 
-        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/3, 10, 30, YELLOW);
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", Update.hours, Update.minutes, Update.seconds), screenWidth/3, 10, 30, YELLOW);
     } 
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
@@ -736,8 +746,15 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
             } else {
                 textGameGUI->tentativas--;
                 if (textGameGUI->tentativas == 0){
+                    
+                    //Reneiciar todos dados essenciais para o sistema de tempo e ranking
+                    Update = (struct Update){0, 0, 0, 0, 0, true, true};
+                    //Reiniciar os paramêtros do jogo
+                    textGameGUI->sequencia_de_acertos = 0;
+                    textGameGUI->tentativas = 3;
+                    //muda o estado para gameover
                     *currentState = STATE_TELA_GAMEOVER;
-                    return;
+                    
                 }
             }
             // if (i < textGameGUI->culpado_index)
@@ -803,17 +820,17 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         (*framesCounter)++;
     }
 
-    if (textGameGUI->sequencia_de_acertos == 10)
+    if (textGameGUI->sequencia_de_acertos == 3)
     { 
         
-        showTime = false;
+        Update.showTime = false;
 
-        Player_ranking.hours = hours;
-        Player_ranking.minutes = minutes;
-        Player_ranking.seconds = seconds;
+        Player_ranking.hours = Update.hours;
+        Player_ranking.minutes = Update.minutes;
+        Player_ranking.seconds = Update.seconds;
 
         
-         if (UpdateRanking)
+         if (Update.ranking)
         {
             updateRanking();
         }
@@ -888,7 +905,7 @@ int updateRanking()
 
     }
 
-    UpdateRanking = false;
+    Update.ranking = false;
 
     fclose(rankingFILE);
 
