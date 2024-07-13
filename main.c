@@ -73,6 +73,7 @@ typedef struct
 typedef struct
 {
     char *history;
+
 } History;
 
 typedef struct 
@@ -83,7 +84,7 @@ typedef struct
     Texture2D texture3;
     Vector2 position;
     Color tint;
-     int width;
+    int width;
     int height;
     int currentTexture;
 } Imagem;
@@ -101,15 +102,17 @@ Ranking Player_ranking;
 
 struct Update
 {
-    float frameTime;
-    float totalSeconds;
+    double firstTime;
+    double currentTime;
+    double elapsedTime; 
     int hours;
     int minutes;
     int seconds;
+    bool startTime;
     bool showTime;
     bool ranking;
 
-}Update = {0,0,0,0,0,true,true} ;
+}Update = {0,0,0,0,0,0,true,true,true} ;
 
      
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
@@ -269,18 +272,25 @@ int main()
                UnloadTexture(rankingTex);
                ClearBackground(BLACK);
                IsRankingState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+
            }else{
+
                 UpdateMusicStream(music);
            }
         }
-        if (currentState != STATE_TELA_GAMEOVER){
-           if(IsgameoverState){
+
+        if (currentState != STATE_TELA_GAMEOVER)
+        {
+           if(IsgameoverState)
+           {
                StopMusicStream(gameovermusic);
                PlayMusicStream(music);
                UnloadTexture(gameoverTex);
                ClearBackground(BLACK);
                IsgameoverState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+
            }else{
+
                 UpdateMusicStream(music);
            }
         }
@@ -343,16 +353,35 @@ int main()
             }
 
             break;
+
         case STATE_TELA_GAMEPLAY:
+
+            if (Update.startTime)
+            {
+                Update.firstTime = GetTime();
+                Update.startTime = false;
+            }
+
+            Update.currentTime = GetTime();
+            Update.elapsedTime = Update.currentTime - Update.firstTime;
+
+            Update.hours = (int)(Update.elapsedTime / 3600);
+            Update.minutes = (int)(Update.elapsedTime / 60) - (Update.hours * 60);
+            Update.seconds = (int)Update.elapsedTime - (Update.hours * 3600) - (Update.minutes * 60);
+            
 
             break;
         
         case STATE_TELA_GAMEOVER:
-        if (!IsgameoverState){
+        
+            if (!IsgameoverState)
+                {
                     StopMusicStream(music); 
                     PlayMusicStream(gameovermusic);
                     IsgameoverState = true; 
+
                 }else{
+
                     UpdateMusicStream(gameovermusic); 
                 }
             
@@ -665,9 +694,9 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
         for(int Z = 0; Z < readCount; Z++)
         {
             char displayText[100];
-            sprintf(displayText, "%s - %02d:%02d:%02d", ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
+            sprintf(displayText, "#%d.%s - %02d:%02d:%02d", Z+1, ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 82 + Z * 35 + 4}, 40, 2, BLACK);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 82 + Z * 35}, 40, 2, ORANGE);
         }
 
         fclose(rankingFILE);
@@ -697,13 +726,6 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     if (Update.showTime)
     {
-        Update.frameTime += GetTime();
-
-        Update.totalSeconds = Update.frameTime / 1000.0f;
-        Update.hours = (int)(Update.totalSeconds / 3600);
-        Update.minutes = (int)(Update.totalSeconds / 60) - (Update.hours * 60);
-        Update.seconds = (int)Update.totalSeconds - (Update.hours * 3600) - (Update.minutes * 60);
-
         DrawText(TextFormat("Tempo: %02d:%02d:%02d", Update.hours, Update.minutes, Update.seconds), screenWidth/3, 10, 30, YELLOW);
     } 
 
@@ -748,7 +770,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 if (textGameGUI->tentativas == 0){
                     
                     //Reneiciar todos dados essenciais para o sistema de tempo e ranking
-                    Update = (struct Update){0, 0, 0, 0, 0, true, true};
+                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
                     //Reiniciar os paramêtros do jogo
                     textGameGUI->sequencia_de_acertos = 0;
                     textGameGUI->tentativas = 3;
@@ -834,8 +856,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         {
             updateRanking();
         }
-    }
-    
+    }  
     
 }
 int updateRanking()
