@@ -116,7 +116,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_MENU;
+    GameState currentState = STATE_TELA_GAMEPLAY;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     InitWindow(screenWidth, screenHeight, "Detetive");
@@ -191,7 +191,7 @@ int main()
         {"DANIEL LIRA", "", {"A menor nota em matemática foi 10 até agora"}, 1},
         {"Prof. Frankin", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
         {"Prof. Dario", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS"}, 1},
-        {"Prof. Heitor", "Cade o modo fácil do DarkSoul?", {"È fan de DarkSouls"}, 1},
+        {"Prof. Heitor", "Cade o modo fácil do DarkSoul?", {"È facinado por jogos"}, 1},
         {"Prof. ALYSSON MENDES", "E culpa do Windows", {"Prefere Linux e gosta de Python"}, 1},
         {"MAGNUS", "", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez"}, 2},
         {"Prof. Antônio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
@@ -707,8 +707,9 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     char acertos[2];
     sprintf(acertos, "%d", textGameGUI->sequencia_de_acertos);
-    DrawText("Sequencia de acertos:", 800, screenHeight -50, 30, ORANGE);
-    DrawText(acertos, 1150, screenHeight -50, 30, ORANGE);
+    DrawText("Sequencia de acertos:", 700, screenHeight -50, 30, ORANGE);
+    DrawText(acertos, 1050, screenHeight -50, 30, ORANGE);
+    DrawText("/10", 1070, screenHeight -50, 30, ORANGE);
 
     // char index[2];
     // sprintf(index, "%d", textGameGUI->culpado_index);
@@ -735,10 +736,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 textGameGUI->victory = 1;
             } else {
                 textGameGUI->tentativas--;
-                if (textGameGUI->tentativas == 0){
-                    *currentState = STATE_TELA_GAMEOVER;
-                    return;
-                }
+              
             }
             // if (i < textGameGUI->culpado_index)
             //     textGameGUI->culpado_index--;
@@ -764,6 +762,8 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
             if(textGameGUI->tentativas==0){
                 // DERROTA
                  cats->currentTexture = 3;
+                  *currentState = STATE_TELA_GAMEOVER;
+                   
                DesenhaImagemPRO(cats);
             } else if(textGameGUI->victory ==1) {
                 //EM CASO DE ACERTO
