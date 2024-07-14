@@ -129,7 +129,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_GAMEPLAY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     InitWindow(screenWidth, screenHeight, "Detetive");
@@ -197,21 +197,21 @@ int main()
 
     Personagem persons[] = {
         // nome -- frase ao ser selecionado -- dica do suspeito
-        {"Prof. Maximiliano Araujo", "fui de Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
-        {"Prof. Henrique Jorge", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
-        {"Prof. Ceres Germanna", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
+        {"Prof. MAX", "fui de Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
+        {"Prof. HENRIQUE", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
+        {"Prof. CERES", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
         {"REGINALDO BATISTA", "", {"Sua frase no status do whats \"é só sei que nada sei\""}, 1},
         {"DANIEL LIRA", "", {"A menor nota em matemática foi 10 até agora"}, 1},
-        {"Prof. Frankin", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
-        {"Prof. Dario", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS"}, 1},
-        {"Prof. Heitor", "Cade o modo fácil do DarkSoul?", {"È facinado por jogos"}, 1},
+        {"Prof. FRANKLIN", "Estudeeee", {"Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
+        {"Prof. DARIO", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS"}, 1},
+        {"Prof. HEITOR", "Cade o modo fácil do DarkSoul?", {"È facinado por jogos"}, 1},
         {"Prof. ALYSSON MENDES", "E culpa do Windows", {"Prefere Linux e gosta de Python"}, 1},
         {"MAGNUS", "", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez"}, 2},
-        {"Prof. Antônio oliveira","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
-        {"Edvan Leite", "", {"Quem tem intolerância a lactose não é amigo dele"}, 1},
+        {"Prof. ANTÔNIO","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
+        {"EDVAN LEITE", "", {"Quem tem intolerância a lactose não é amigo dele"}, 1},
         {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° Período de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
         {"TALES GABRIEL", "Bora para o R.U", {"Homem dos olhos de vidros By Professor Antônio"}, 1},
-        {"Elânio Jonas", "Que isso, meu parceiro", {"50% economista"}, 1}
+        {"ELANIO JONAS", "Que isso, meu parceiro", {"50% economista"}, 1}
         
         };
     // embaralhar  todo o array
@@ -607,7 +607,6 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
     Button btn_dica = {(Rectangle){screenWidth / 4 -150 , 300, 800, 50},  textHistory->suspect_msg, 1, 1, DARKBLUE};
     DrawButton(btn_dica);
     // Desenha o retângulo e a caixa de texto
-    DrawRectangleLinesEx(container, 3, RED);
 
     // Lógica para exibir o texto progressivamente
     if (*framesCounter < strlen(textHistory->text) * 3)
@@ -619,7 +618,7 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
         }
         DrawTextBoxed(font, TextSubtext(textHistory->text, 0, lengthToShow),
                       (Rectangle){container.x + 4, container.y + 4, container.width - 4, container.height - 4},
-                      40.0f, 2.0f, true, RED);
+                      40.0f, 2.0f, true, WHITE);
 
         (*framesCounter)++;
     }
@@ -628,7 +627,7 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
         // Se já exibiu todo o texto, e completamente sem o efeito de digitação
         DrawTextBoxed(font, textHistory->text,
                       (Rectangle){container.x + 4, container.y + 4, container.width - 4, container.height - 4},
-                      40.0f, 2.0f, true, RED);
+                      40.0f, 2.0f, true, WHITE);
     }
 
     // Se já exibiu todo o texto, e completamente sem o efeito de digitação
@@ -650,7 +649,6 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
         *currentState = STATE_TELA_MENU;
     }
     // DrawText("Dica: o suspeito barabaaadsafsadfsadfsafbabasvbsavsv", 300, 200, 30, RED);
-    DrawText("Historia...", 10, 10, 30, BLUE);
     // DrawText(, 500, 200, 30, BLUE);
 }
 
