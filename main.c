@@ -47,6 +47,7 @@ typedef struct
     char *suspect_text[MAX_DICAS];
     int num_hints;
 } Personagem;
+
 typedef struct {
     int index;
     bool selected;
@@ -72,6 +73,7 @@ typedef struct
 typedef struct
 {
     char *history;
+
 } History;
 
 typedef struct 
@@ -82,7 +84,7 @@ typedef struct
     Texture2D texture3;
     Vector2 position;
     Color tint;
-     int width;
+    int width;
     int height;
     int currentTexture;
 } Imagem;
@@ -96,12 +98,23 @@ typedef struct
 
 } Ranking;
 
-        
-float frameTime = 0;        
-float totalSeconds; int hours; int minutes;  int seconds;
 Ranking Player_ranking;
-bool showTime = true;
-bool UpdateRanking = true;
+
+struct Update
+{
+    double firstTime;
+    double currentTime;
+    double elapsedTime; 
+    int hours;
+    int minutes;
+    int seconds;
+    bool startTime;
+    bool showTime;
+    bool ranking;
+
+}Update = {0,0,0,0,0,0,true,true,true} ;
+
+     
 // Função de atualização que retorna uma estrutura com as novas posições de rolagem
 _Bool IsButtonClicked(Button button);
 void DesenhatextoDinamico(const char *text, int posX, int posY, int fontSize, Color color, bool show);
@@ -259,18 +272,25 @@ int main()
                UnloadTexture(rankingTex);
                ClearBackground(BLACK);
                IsRankingState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+
            }else{
+
                 UpdateMusicStream(music);
            }
         }
-        if (currentState != STATE_TELA_GAMEOVER){
-           if(IsgameoverState){
+
+        if (currentState != STATE_TELA_GAMEOVER)
+        {
+           if(IsgameoverState)
+           {
                StopMusicStream(gameovermusic);
                PlayMusicStream(music);
                UnloadTexture(gameoverTex);
                ClearBackground(BLACK);
                IsgameoverState = false; // Atualizar a variável para indicar que a música de ranking não está mais tocando
+
            }else{
+
                 UpdateMusicStream(music);
            }
         }
@@ -333,16 +353,35 @@ int main()
             }
 
             break;
+
         case STATE_TELA_GAMEPLAY:
+
+            if (Update.startTime)
+            {
+                Update.firstTime = GetTime();
+                Update.startTime = false;
+            }
+
+            Update.currentTime = GetTime();
+            Update.elapsedTime = Update.currentTime - Update.firstTime;
+
+            Update.hours = (int)(Update.elapsedTime / 3600);
+            Update.minutes = (int)(Update.elapsedTime / 60) - (Update.hours * 60);
+            Update.seconds = (int)Update.elapsedTime - (Update.hours * 3600) - (Update.minutes * 60);
+            
 
             break;
         
         case STATE_TELA_GAMEOVER:
-        if (!IsgameoverState){
+        
+            if (!IsgameoverState)
+                {
                     StopMusicStream(music); 
                     PlayMusicStream(gameovermusic);
                     IsgameoverState = true; 
+
                 }else{
+
                     UpdateMusicStream(gameovermusic); 
                 }
             
@@ -655,9 +694,9 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
         for(int Z = 0; Z < readCount; Z++)
         {
             char displayText[100];
-            sprintf(displayText, "%s - %02d:%02d:%02d", ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35 + 4}, 40, 2, BLACK);
-            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/2.5f, 82 + Z * 35}, 40, 2, ORANGE);
+            sprintf(displayText, "#%d.%s - %02d:%02d:%02d", Z+1, ranking[Z].name, ranking[Z].hours, ranking[Z].minutes, ranking[Z].seconds);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 82 + Z * 35 + 4}, 40, 2, BLACK);
+            DrawTextEx(rankingFont, displayText, (Vector2){screenWidth/3.0f, 82 + Z * 35}, 40, 2, ORANGE);
         }
 
         fclose(rankingFILE);
@@ -685,16 +724,9 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     DrawTextureEx(inter_room, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
 
-    if (showTime)
+    if (Update.showTime)
     {
-        frameTime += GetTime();
-
-        totalSeconds = frameTime / 1000.0f;
-        hours = (int)(totalSeconds / 3600);
-        minutes = (int)(totalSeconds / 60) - (hours * 60);
-        seconds = (int)totalSeconds - (hours * 3600) - (minutes * 60);
-
-        DrawText(TextFormat("Tempo: %02d:%02d:%02d", hours, minutes, seconds), screenWidth/3, 10, 30, YELLOW);
+        DrawText(TextFormat("Tempo: %02d:%02d:%02d", Update.hours, Update.minutes, Update.seconds), screenWidth/3, 10, 30, YELLOW);
     } 
 
     DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
@@ -736,7 +768,17 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 textGameGUI->victory = 1;
             } else {
                 textGameGUI->tentativas--;
-              
+                if (textGameGUI->tentativas == 0){
+                    
+                    //Reneiciar todos dados essenciais para o sistema de tempo e ranking
+                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
+                    //Reiniciar os paramêtros do jogo
+                    textGameGUI->sequencia_de_acertos = 0;
+                    textGameGUI->tentativas = 3;
+                    //muda o estado para gameover
+                    *currentState = STATE_TELA_GAMEOVER;
+                    
+                }
             }
             // if (i < textGameGUI->culpado_index)
             //     textGameGUI->culpado_index--;
@@ -803,22 +845,21 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         (*framesCounter)++;
     }
 
-    if (textGameGUI->sequencia_de_acertos == 10)
+    if (textGameGUI->sequencia_de_acertos == 3)
     { 
         
-        showTime = false;
+        Update.showTime = false;
 
-        Player_ranking.hours = hours;
-        Player_ranking.minutes = minutes;
-        Player_ranking.seconds = seconds;
+        Player_ranking.hours = Update.hours;
+        Player_ranking.minutes = Update.minutes;
+        Player_ranking.seconds = Update.seconds;
 
         
-         if (UpdateRanking)
+         if (Update.ranking)
         {
             updateRanking();
         }
-    }
-    
+    }  
     
 }
 int updateRanking()
@@ -888,7 +929,7 @@ int updateRanking()
 
     }
 
-    UpdateRanking = false;
+    Update.ranking = false;
 
     fclose(rankingFILE);
 
