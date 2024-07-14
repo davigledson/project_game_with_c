@@ -198,7 +198,7 @@ int main()
     Personagem persons[] = {
         // nome -- frase ao ser selecionado -- dica do suspeito
         {"Prof. Maximiliano Araujo", "fui de Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
-        {"Prof. Henrique Jorge", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
+        {"Prof. Henrique Jorge", "", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
         {"Prof. Ceres Germanna", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
         {"REGINALDO BATISTA", "", {"Sua frase no status do whats \"é só sei que nada sei\""}, 1},
         {"DANIEL LIRA", "", {"A menor nota em matemática foi 10 até agora"}, 1},
@@ -666,14 +666,20 @@ void gameOverGUI(TextForGUI textGameOver, Texture2D gameoverTex,int framesCounte
     float backgroundOffsetX = (screenWidth - gameoverTex.width * scale) / 3;
     float backgroundOffsetY = (screenHeight - gameoverTex.height * scale) / 3;
 
-    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
+    Button btnBack = {(Rectangle){screenWidth / 2-300, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
+    Button fecharBtn = {(Rectangle){screenWidth / 2 + 100, 550, 200, 50}, "Sair do game", false, false, MAROON};
     
 
     DrawTextureEx(gameoverTex, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
     DrawButton(btnBack);
+    DrawButton(fecharBtn);
     if(IsButtonClicked(btnBack)){
         
-        *currentState = STATE_TELA_MENU;
+        *currentState = STATE_TELA_GAMEPLAY;
+    }
+     if(IsButtonClicked(fecharBtn)){
+        
+        CloseWindow();
     }
 }
 
@@ -768,17 +774,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 textGameGUI->victory = 1;
             } else {
                 textGameGUI->tentativas--;
-                if (textGameGUI->tentativas == 0){
-                    
-                    //Reneiciar todos dados essenciais para o sistema de tempo e ranking
-                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
-                    //Reiniciar os paramêtros do jogo
-                    textGameGUI->sequencia_de_acertos = 0;
-                    textGameGUI->tentativas = 3;
-                    //muda o estado para gameover
-                    *currentState = STATE_TELA_GAMEOVER;
-                    
-                }
+               
             }
             // if (i < textGameGUI->culpado_index)
             //     textGameGUI->culpado_index--;
@@ -801,20 +797,16 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
     {
         Button btnContinua = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Continua", false, false, ORANGE};
             //DrawText("GATO", 440, 240, 60, GREEN);
-            if(textGameGUI->tentativas==0){
-                // DERROTA
-                 cats->currentTexture = 3;
-                  *currentState = STATE_TELA_GAMEOVER;
-                   
-               DesenhaImagemPRO(cats);
-            } else if(textGameGUI->victory ==1) {
+            
+             if(textGameGUI->victory ==1) {
                 //EM CASO DE ACERTO
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
 
                DrawButton(btnContinua);
                if(IsButtonClicked(btnContinua)){
-       
+                int totalCharacters = sizeof(persons) / sizeof(persons[0]);
+                embaralhar(persons, totalCharacters);
                 GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
                     textGameGUI->victory = 0; 
                     textGameGUI->showDeathText = 0;
@@ -844,6 +836,23 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                       30.0f, 2.0f, true, RED);
         (*framesCounter)++;
     }
+if(textGameGUI->tentativas==0){
+                // DERROTA
+                 cats->currentTexture = 3;     
+                  GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
+                    textGameGUI->victory = 0; 
+                    textGameGUI->showDeathText = 0;
+                    textGameGUI->sequencia_de_acertos = 0;
+                    textGameGUI->tentativas = 3;
+                     //Reneiciar todos dados essenciais para o sistema de tempo e ranking
+                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
+                    //Reiniciar os paramêtros do jogo            
+                    //muda o estado para gameover
+                    
+                    *currentState = STATE_TELA_GAMEOVER;
+                   
+               DesenhaImagemPRO(cats);
+            }
 
     if (textGameGUI->sequencia_de_acertos == 3)
     { 
