@@ -129,7 +129,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_GAMEPLAY;
+    GameState currentState = STATE_TELA_MENU;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     InitWindow(screenWidth, screenHeight, "Detetive");
@@ -198,20 +198,21 @@ int main()
     Personagem persons[] = {
         // nome -- frase ao ser selecionado -- dica do suspeito
         {"Prof. Maximiliano araujo", "fui de Vasco", {"fez a faculdade no UFRN","Teve um professor pagodeiro em sua época de faculdade"}, 2},
-        {"Prof. HENRIQUE", "esqueci", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
-        {"Prof. CERES", "como é o nome de Talless?", {"vai me dar um 10 nesse trabalho de desenvolvimento de jogo", "Recebeu 10 em sua apresentação de TCC, em sua epoca de faculdade"}, 2},
+        {"Prof. HENRIQUE", "", {"Seu cargo anterior era de analista de sistemas","Sua esposa é professora no IFRN"}, 2},
+        {"Prof. CERES", "como é o nome de Talless?", {"Recebeu 10 em sua apresentação de TCC, em sua época de faculdade"}, 1},
         {"REGINALDO BATISTA", "", {"do 1° Período, Sua frase no status do whats \"é só sei que nada sei\""}, 1},
         {"DANIEL LIRA", "", {"do 1° Período, A menor nota em matemática foi 10 até agora"}, 1},
         {"Prof. FRANKLIN", "Estudeeee", {"do departamento de Matemática,Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
-        {"Prof. DARIO", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS"}, 1},
-        {"Prof. HEITOR", "Cade o modo fácil do DarkSoul?", {"È facinado por jogos"}, 1},
+        {"Prof. DARIO", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS","Usa o mesmo slide há mais de 10 anos"}, 2},
+        {"Prof. HEITOR", "Cade o modo fácil do DarkSoul?", {"È Fascínio por jogos"}, 1},
         {"Prof. ALYSSON MENDES", "E culpa do Windows", {"Prefere Linux e gosta de Python"}, 1},
         {"MAGNUS", "", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez"}, 2},
         {"Prof. ANTÔNIO OLIVEIRA","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
         {"EDVAN LEITE", "", {"do 1° Período, Quem tem intolerância a lactose não é amigo dele"}, 1},
         {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° Período de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
         {"TALES GABRIEL", "Bora para o R.U", {"do 1° Período, Homem dos olhos de vidros By Professor Antônio"}, 1},
-        {"ELANIO JONAS", "Que isso, meu parceiro", {"do 1° Período, 50% economista"}, 1}
+        {"ELANIO JONAS", "Que isso, meu parceiro", {"do 1° Período, 50% economista"}, 1},
+        {"Alerrandro Martins","", {"Do 1° Período, e tem domínio em POG, \"Programação Orientada a Gambiarras\""}, 1}
         
         };
     // embaralhar  todo o array
