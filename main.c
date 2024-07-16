@@ -604,8 +604,14 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
     Rectangle container = {25.0f, 25.0f, screenWidth - 50.0f, screenHeight - 250.0f};
     Rectangle resizer = {container.x + container.width - 17, container.y + container.height - 17, 14, 14};
     Font font = GetFontDefault();
-    Button btn_dica = {(Rectangle){screenWidth / 4 -150 , 300, 800, 50},  textHistory->suspect_msg, 1, 1, DARKBLUE};
-    DrawButton(btn_dica);
+
+    //Button btn_dica = {(Rectangle){screenWidth / 4 -150 , 300, 800, 50},  textHistory->suspect_msg, 1, 1, DARKBLUE};
+    //DrawButton(btn_dica);
+    Rectangle containerDica = {screenWidth / 4 -150, 300, 900, 300};
+    //DrawText(textHistory->suspect_msg,screenWidth / 4 -150 , 300, 30, WHITE);
+    DrawTextBoxed(font, textHistory->suspect_msg,
+                      (Rectangle){containerDica.x + 4, containerDica.y + 4, containerDica.width - 4, containerDica.height - 4},
+                      30.0f, 2.0f, true, WHITE);
     // Desenha o retângulo e a caixa de texto
 
     // Lógica para exibir o texto progressivamente
@@ -635,8 +641,8 @@ void historyGUI(TextForGUI *textHistory, Texture2D background_history, int *fram
    // DrawTextWrapped(font, textHistory->suspect_msg,
                     //(Rectangle){300, 200, screenWidth - 350, 200}, 30.0f, 2.0f, RED);
 
-    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 460, 200, 50}, "Voltar", false, false, MAROON};
-    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Avançar", false, false,DARKBLUE};
+    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 560, 200, 50}, "Voltar", false, false, MAROON};
+    Button btnAvanca = {(Rectangle){screenWidth / 2 - 100, 500, 200, 50}, "Avançar", false, false,DARKBLUE};
     DrawButton(btnAvanca);
     DrawButton(btnBack);
 
