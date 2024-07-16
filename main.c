@@ -129,7 +129,7 @@ int main()
     // Initialization
     //--------------------------------------------------------------------------------------
     srand(time(NULL));
-    GameState currentState = STATE_TELA_MENU;
+    GameState currentState = STATE_TELA_GAMEPLAY;
     ScrollingPositions positions = {0.0f, 0.0f, 0.0f};
 
     InitWindow(screenWidth, screenHeight, "Detetive");
@@ -150,7 +150,7 @@ int main()
     Texture2D background = LoadTexture("resources/cyberpunk_street_background.png");
     Texture2D midground = LoadTexture("resources/cyberpunk_street_midground.png");
     Texture2D foreground = LoadTexture("resources/cyberpunk_street_foreground.png");
-    Texture2D inter_room = LoadTexture("imgs/inter_room.png");
+    Texture2D inter_room = LoadTexture("imgs/cena_crime.png");
     Texture2D background_history = LoadTexture("imgs/historiatema.png");
     Texture2D gameoverTex = LoadTexture("imgs/ana.png");
     Texture2D background_victory = LoadTexture("imgs/background_gameover.png");
@@ -670,14 +670,19 @@ void gameOverGUI(TextForGUI textGameOver, Texture2D gameoverTex,int framesCounte
     float backgroundOffsetX = (screenWidth - gameoverTex.width * scale) / 3;
     float backgroundOffsetY = (screenHeight - gameoverTex.height * scale) / 3;
 
-    Button btnBack = {(Rectangle){screenWidth / 2 - 100, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
+    Button btnBack = {(Rectangle){screenWidth / 2-300, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
+    Button fecharBtn = {(Rectangle){screenWidth / 2 + 100, 550, 200, 50}, "Sair do game", false, false, MAROON};
     
 
     DrawTextureEx(gameoverTex, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
     DrawButton(btnBack);
+    DrawButton(fecharBtn);
     if(IsButtonClicked(btnBack)){
         
-        *currentState = STATE_TELA_MENU;
+        *currentState = STATE_TELA_GAMEPLAY;
+    }
+    if(IsButtonClicked(fecharBtn)){
+        CloseWindow();
     }
 }
 
@@ -717,7 +722,8 @@ void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont
 
 void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Texture2D inter_room, int *framesCounter, TextForGUI *textGameGUI, Imagem *cats, Personagem *persons)
 {
-
+    Color textColor = YELLOW;
+    Color textColor2 = ORANGE;
     ClearBackground(RAYWHITE);
     // centralizar a imagem no centro e a escala prencher a tela
     float scaleX = (float)screenWidth / inter_room.width;
@@ -733,13 +739,13 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         DrawText(TextFormat("Tempo: %02d:%02d:%02d", Update.hours, Update.minutes, Update.seconds), screenWidth/3, 10, 30, YELLOW);
     } 
 
-    DrawText("Lista de Suspeitos", 10, 10, 30, BLUE);
-    DrawText("Dica:", 10, 50, 30, BLUE);
+    DrawText("Lista de Suspeitos", 10, 10, 30, textColor2);
+    DrawText("Dica:", 10, 50, 30, textColor2);
 
     char tent_text[2];
     sprintf(tent_text, "%d", textGameGUI->tentativas);
-    DrawText("Tentativas:", 800, 10, 30, BLUE);
-    DrawText(tent_text, 990, 10, 30, BLUE);
+    DrawText("Tentativas:", 800, 10, 30, textColor2);
+    DrawText(tent_text, 990, 10, 30, textColor2);
 
     char acertos[2];
     sprintf(acertos, "%d", textGameGUI->sequencia_de_acertos);
@@ -760,7 +766,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
     DrawTextBoxed(GetFontDefault(), textGameGUI->suspect_msg,
                       (Rectangle){container.x + 4, container.y + 4, container.width - 4, container.height - 4},
-                      30.0f, 2.0f, true, RED);
+                      30.0f, 2.0f, true, textColor2);
         
     for (int i = 0; i < *buttonCount; i++)
     {
@@ -772,17 +778,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 textGameGUI->victory = 1;
             } else {
                 textGameGUI->tentativas--;
-                if (textGameGUI->tentativas == 0){
-                    
-                    //Reneiciar todos dados essenciais para o sistema de tempo e ranking
-                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
-                    //Reiniciar os paramêtros do jogo
-                    textGameGUI->sequencia_de_acertos = 0;
-                    textGameGUI->tentativas = 3;
-                    //muda o estado para gameover
-                    *currentState = STATE_TELA_GAMEOVER;
-                    
-                }
+                
             }
             // if (i < textGameGUI->culpado_index)
             //     textGameGUI->culpado_index--;
@@ -845,10 +841,27 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
         Rectangle container2 = {screenWidth /2, 200,600,400};
         DrawTextBoxed(GetFontDefault(), TextSubtext(textGameGUI->theDeadText, 0, lengthToShow),
                       (Rectangle){container2.x + 4, container2.y + 4, container2.width - 4, container2.height - 4},
-                      30.0f, 2.0f, true, RED);
+                      30.0f, 2.0f, true,  GOLD);
         (*framesCounter)++;
     }
 
+    if(textGameGUI->tentativas==0){
+                // DERROTA
+                 cats->currentTexture = 3;     
+                  GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
+                    textGameGUI->victory = 0; 
+                    textGameGUI->showDeathText = 0;
+                    textGameGUI->sequencia_de_acertos = 0;
+                    textGameGUI->tentativas = 3;
+                     //Reneiciar todos dados essenciais para o sistema de tempo e ranking
+                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
+                    //Reiniciar os paramêtros do jogo            
+                    //muda o estado para gameover
+
+                    *currentState = STATE_TELA_GAMEOVER;
+
+               DesenhaImagemPRO(cats);
+            }
     if (textGameGUI->sequencia_de_acertos == 3)
     { 
         
