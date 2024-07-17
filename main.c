@@ -204,15 +204,15 @@ int main()
         {"DANIEL LIRA", "", {"do 1° Período, A menor nota em matemática foi 10 até agora"}, 1},
         {"Prof. FRANKLIN", "Estudeeee", {"do departamento de Matemática,Durante sua época de faculdade, trancou alguns períodos para trabalhar"}, 1},
         {"Prof. DARIO", "Meus alunos, meus amigos", {"E o inimigo numero 1 do INSS","Usa o mesmo slide há mais de 10 anos"}, 2},
-        {"Prof. HEITOR", "Cade o modo fácil do DarkSoul?", {"È Fascínio por jogos"}, 1},
+        {"Prof. HEITOR", "Cade o modo fácil do DarkSoul?", {"Tem Fascínio por jogos"}, 1},
         {"Prof. ALYSSON MENDES", "E culpa do Windows", {"Prefere Linux e gosta de Python"}, 1},
-        {"MAGNUS", "", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez"}, 2},
+        {"MAGNUS", "Tranquem o Curso!", {"Provavelmente o próximo aluno laureado","Tem como nome um dos maiores jogadores de xadrez"}, 2},
         {"Prof. ANTÔNIO OLIVEIRA","Eu seria mais feliz no tempo antes da escrita", {"Inimigo do Python e da linguagem C", "Inimigo da Maçonaria", "Inimigo da NASA"}, 3},
         {"EDVAN LEITE", "", {"do 1° Período, Quem tem intolerância a lactose não é amigo dele"}, 1},
         {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° Período de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
         {"TALES GABRIEL", "Bora para o R.U", {"do 1° Período, Homem dos olhos de vidros By Professor Antônio"}, 1},
         {"ELANIO JONAS", "Que isso, meu parceiro", {"do 1° Período, 50% economista"}, 1},
-        {"Alerrandro Martins","", {"Do 1° Período, e tem domínio em POG, \"Programação Orientada a Gambiarras\""}, 1}
+        {"Alerrandro Martins","", {"Do 1° Período, e de Tibal e tem domínio em POG, \"Programação Orientada a Gambiarras\""}, 1}
         
         };
     // embaralhar  todo o array
