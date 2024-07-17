@@ -663,19 +663,14 @@ void victoryGUI(TextForGUI textVictory, Texture2D background_victory,int framesC
     ClearBackground(RAYWHITE);
 DrawText("Vitoria", 240, 140, 60, GREEN);
 }
-void gameOverGUI(TextForGUI textGameOver, Texture2D gameoverTex,int framesCounter, GameState *currentState){
-    ClearBackground(RAYWHITE);
-    float scaleX = (float)screenWidth / gameoverTex.width;
-    float scaleY = (float)screenHeight / gameoverTex.height;
-    float scale = (scaleX > scaleY) ? scaleX : scaleY;
-    float backgroundOffsetX = (screenWidth - gameoverTex.width * scale) / 3;
-    float backgroundOffsetY = (screenHeight - gameoverTex.height * scale) / 3;
-
-    Button btnBack = {(Rectangle){screenWidth / 2-300, 550, 200, 50}, "Jogar novamente", false, false, MAROON};
-    Button fecharBtn = {(Rectangle){screenWidth / 2 + 100, 550, 200, 50}, "Sair do game", false, false, MAROON};
+void gameOverGUI(TextForGUI textGameOver, Texture2D background_gameover,int framesCounter, GameState *currentState){
+    ClearBackground(WHITE);
+DrawText("GAME OVER", (screenWidth - 450)/2, (screenHeight - 300) /2, 75, RED);
+//DrawTexture(background_gameover, 490,250, WHITE);
     
-
-    DrawTextureEx(gameoverTex, (Vector2){backgroundOffsetX, backgroundOffsetY}, 0.0f, scale, WHITE);
+    Button btnBack = {(Rectangle){500, 470, 200, 50}, "Jogar novamente", false, false, MAROON};
+    Button fecharBtn = {(Rectangle){500, 550, 200, 50}, "Sair", false, false, MAROON};
+    
     DrawButton(btnBack);
     DrawButton(fecharBtn);
     if(IsButtonClicked(btnBack)){
@@ -686,6 +681,7 @@ void gameOverGUI(TextForGUI textGameOver, Texture2D gameoverTex,int framesCounte
         CloseWindow();
     }
 }
+
 
 
 void rankingGUI(GameState *currentState, Texture2D *rankingTex, Font rankingFont)
