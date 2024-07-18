@@ -815,7 +815,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
 
-                if (textGameGUI->sequencia_de_acertos >= 2)
+                if (textGameGUI->sequencia_de_acertos >= 10)
     { 
     Button btnIrparaORanking= {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Ranking", false, false, ORANGE};
 
