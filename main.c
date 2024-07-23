@@ -212,7 +212,9 @@ int main()
         {"GABRIEL ARTHUR", "Lá ele", {"Imitador do 1° Período de Ciência da Computação","Amante da NASA By Professor Antônio"}, 2},
         {"TALES GABRIEL", "Bora para o R.U", {"do 1° Período, Homem dos olhos de vidros By Professor Antônio"}, 1},
         {"ELANIO JONAS", "Que isso, meu parceiro", {"do 1° Período, 50% economista"}, 1},
-        {"Alerrandro Martins","", {"Do 1° Período, e de Tibal e tem domínio em POG, \"Programação Orientada a Gambiarras\""}, 1}
+        {"Alerrandro Martins","", {"Do 1° Período, e de Tibau e tem domínio em POG, \"Programação Orientada a Gambiarras\""}, 1},
+        {"Ana Kelry","Isso é racismo!",{"Do 1° Período, Baixinha,\"Crente\" Kpop "},1},
+        {"Roque","",{"Ele é do Rock"},1},
         
         };
     // embaralhar  todo o array
@@ -228,6 +230,9 @@ int main()
     {"Na UERN, alguém deixou a porta de aula aberta fazendo com que vários animais entre, o que se sabe sobre o culpado é que:"},
     {"Na UERN, alguém fez um gato na energia fazendo com que tivesse um apagão durante dois dias, o que se sabe sobre o culpado é que:"},
     {"Na UERN, alguém derrubou o Wi-Fi mais uma vez, o que se sabe sobre o culpado é que:"},
+    
+    
+
 };
 
    int total_history_context = sizeof(history_context) / sizeof(history_context[0]);
@@ -805,12 +810,50 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                    
                DesenhaImagemPRO(cats);
             } else if(textGameGUI->victory ==1) {
+
                 //EM CASO DE ACERTO
                 
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
 
-               DrawButton(btnContinua);
+                if (textGameGUI->sequencia_de_acertos >= 10)
+    { 
+    Button btnIrparaORanking= {(Rectangle){screenWidth / 2 - 100, 400, 200, 50}, "Ranking", false, false, ORANGE};
+
+        Update.showTime = false;
+        DrawButton(btnIrparaORanking);
+        Player_ranking.hours = Update.hours;
+        Player_ranking.minutes = Update.minutes;
+        Player_ranking.seconds = Update.seconds;
+
+        
+         if (Update.ranking)
+        {
+            updateRanking();
+        }
+
+        if(IsButtonClicked(btnIrparaORanking)){
+
+                    GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
+                    textGameGUI->victory = 0; 
+                    textGameGUI->showDeathText = 0;
+                    textGameGUI->sequencia_de_acertos = 0;
+                    textGameGUI->tentativas = 3;
+                     //Reneiciar todos dados essenciais para o sistema de tempo e ranking
+                    Update = (struct Update){0 ,0 , 0, 0, 0, 0, true, true, true};
+                    //Reiniciar os paramêtros do jogo            
+                    //muda o estado para gameover
+                    *currentState = STATE_TELA_RANKING;
+                  
+        }
+            
+        
+
+    }  else {
+        DrawButton(btnContinua);
+    }
+               
+               
                if(IsButtonClicked(btnContinua)){
        
                 GerarNovoSuspeito(textGameGUI, persons, *buttonCount);
@@ -860,21 +903,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
 
                DesenhaImagemPRO(cats);
             }
-    if (textGameGUI->sequencia_de_acertos == 3)
-    { 
-        
-        Update.showTime = false;
-
-        Player_ranking.hours = Update.hours;
-        Player_ranking.minutes = Update.minutes;
-        Player_ranking.seconds = Update.seconds;
-
-        
-         if (Update.ranking)
-        {
-            updateRanking();
-        }
-    }  
+    
     
 }
 int updateRanking()
