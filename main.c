@@ -664,7 +664,7 @@ void victoryGUI(TextForGUI textVictory, Texture2D background_victory,int framesC
 DrawText("Vitoria", 240, 140, 60, GREEN);
 }
 void gameOverGUI(TextForGUI textGameOver, Texture2D background_gameover,int framesCounter, GameState *currentState){
-    ClearBackground(WHITE);
+    ClearBackground(BLACK);
 DrawText("GAME OVER", (screenWidth - 450)/2, (screenHeight - 300) /2, 75, RED);
 //DrawTexture(background_gameover, 490,250, WHITE);
     
@@ -806,6 +806,7 @@ void gameGUI(GameState *currentState, Button buttons[], int *buttonCount, Textur
                DesenhaImagemPRO(cats);
             } else if(textGameGUI->victory ==1) {
                 //EM CASO DE ACERTO
+                
                 cats->currentTexture =2;
                DesenhaImagemPRO(cats);
 
